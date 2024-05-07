@@ -1563,10 +1563,10 @@ export interface AuthorizeOrganization {
 export interface AuthorizeResponseOrganization {
     /**
      * 
-     * @type {OAuth2Client}
+     * @type {OAuth2ClientPublic}
      * @memberof AuthorizeResponseOrganization
      */
-    client: OAuth2Client;
+    client: OAuth2ClientPublic;
     /**
      * 
      * @type {string}
@@ -1610,10 +1610,10 @@ export type AuthorizeResponseOrganizationSubTypeEnum = typeof AuthorizeResponseO
 export interface AuthorizeResponseUser {
     /**
      * 
-     * @type {OAuth2Client}
+     * @type {OAuth2ClientPublic}
      * @memberof AuthorizeResponseUser
      */
-    client: OAuth2Client;
+    client: OAuth2ClientPublic;
     /**
      * 
      * @type {string}
@@ -6297,74 +6297,255 @@ export interface NotificationsMarkRead {
 /**
  * 
  * @export
- * @interface OAuth2Client
+ * @interface OAuth2ClientConfiguration
  */
-export interface OAuth2Client {
+export interface OAuth2ClientConfiguration {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfiguration
+     */
+    redirect_uris: Array<string>;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2Client
+     * @memberof OAuth2ClientConfiguration
      */
-    created_at: string;
+    token_endpoint_auth_method?: OAuth2ClientConfigurationTokenEndpointAuthMethodEnum;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfiguration
+     */
+    grant_types?: Array<OAuth2ClientConfigurationGrantTypesEnum>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfiguration
+     */
+    response_types?: Array<OAuth2ClientConfigurationResponseTypesEnum>;
+    /**
+     * 
+     * @type {Array<Scope>}
+     * @memberof OAuth2ClientConfiguration
+     */
+    scope?: Array<Scope>;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2Client
+     * @memberof OAuth2ClientConfiguration
      */
-    modified_at?: string;
+    client_name: string;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2Client
-     */
-    id: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof OAuth2Client
-     */
-    client_id: string;
-    /**
-     * 
-     * @type {OAuth2ClientMetadata}
-     * @memberof OAuth2Client
-     */
-    client_metadata: OAuth2ClientMetadata;
-}
-/**
- * 
- * @export
- * @interface OAuth2ClientMetadata
- */
-export interface OAuth2ClientMetadata {
-    /**
-     * 
-     * @type {string}
-     * @memberof OAuth2ClientMetadata
-     */
-    client_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof OAuth2ClientMetadata
+     * @memberof OAuth2ClientConfiguration
      */
     client_uri?: string;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2ClientMetadata
+     * @memberof OAuth2ClientConfiguration
      */
     logo_uri?: string;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2ClientMetadata
+     * @memberof OAuth2ClientConfiguration
      */
     tos_uri?: string;
     /**
      * 
      * @type {string}
-     * @memberof OAuth2ClientMetadata
+     * @memberof OAuth2ClientConfiguration
+     */
+    policy_uri?: string;
+}
+
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationTokenEndpointAuthMethodEnum = {
+    CLIENT_SECRET_POST: 'client_secret_post'
+} as const;
+export type OAuth2ClientConfigurationTokenEndpointAuthMethodEnum = typeof OAuth2ClientConfigurationTokenEndpointAuthMethodEnum[keyof typeof OAuth2ClientConfigurationTokenEndpointAuthMethodEnum];
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationGrantTypesEnum = {
+    AUTHORIZATION_CODE: 'authorization_code',
+    REFRESH_TOKEN: 'refresh_token'
+} as const;
+export type OAuth2ClientConfigurationGrantTypesEnum = typeof OAuth2ClientConfigurationGrantTypesEnum[keyof typeof OAuth2ClientConfigurationGrantTypesEnum];
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationResponseTypesEnum = {
+    CODE: 'code'
+} as const;
+export type OAuth2ClientConfigurationResponseTypesEnum = typeof OAuth2ClientConfigurationResponseTypesEnum[keyof typeof OAuth2ClientConfigurationResponseTypesEnum];
+
+/**
+ * 
+ * @export
+ * @interface OAuth2ClientConfigurationUpdate
+ */
+export interface OAuth2ClientConfigurationUpdate {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    redirect_uris: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    token_endpoint_auth_method?: OAuth2ClientConfigurationUpdateTokenEndpointAuthMethodEnum;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    grant_types?: Array<OAuth2ClientConfigurationUpdateGrantTypesEnum>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    response_types?: Array<OAuth2ClientConfigurationUpdateResponseTypesEnum>;
+    /**
+     * 
+     * @type {Array<Scope>}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    scope?: Array<Scope>;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    client_name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    client_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    logo_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    tos_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    policy_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientConfigurationUpdate
+     */
+    client_id: string;
+}
+
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationUpdateTokenEndpointAuthMethodEnum = {
+    CLIENT_SECRET_POST: 'client_secret_post'
+} as const;
+export type OAuth2ClientConfigurationUpdateTokenEndpointAuthMethodEnum = typeof OAuth2ClientConfigurationUpdateTokenEndpointAuthMethodEnum[keyof typeof OAuth2ClientConfigurationUpdateTokenEndpointAuthMethodEnum];
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationUpdateGrantTypesEnum = {
+    AUTHORIZATION_CODE: 'authorization_code',
+    REFRESH_TOKEN: 'refresh_token'
+} as const;
+export type OAuth2ClientConfigurationUpdateGrantTypesEnum = typeof OAuth2ClientConfigurationUpdateGrantTypesEnum[keyof typeof OAuth2ClientConfigurationUpdateGrantTypesEnum];
+
+/**
+ * @export
+ */
+export const OAuth2ClientConfigurationUpdateResponseTypesEnum = {
+    CODE: 'code'
+} as const;
+export type OAuth2ClientConfigurationUpdateResponseTypesEnum = typeof OAuth2ClientConfigurationUpdateResponseTypesEnum[keyof typeof OAuth2ClientConfigurationUpdateResponseTypesEnum];
+
+/**
+ * 
+ * @export
+ * @interface OAuth2ClientPublic
+ */
+export interface OAuth2ClientPublic {
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    created_at: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    modified_at?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    client_id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    client_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    client_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    logo_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
+     */
+    tos_uri?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuth2ClientPublic
      */
     policy_uri?: string;
 }
@@ -8298,6 +8479,8 @@ export const Scope = {
     CREATORSUBSCRIPTIONSWRITE: 'creator:subscriptions:write',
     BACKERSUBSCRIPTIONSREAD: 'backer:subscriptions:read',
     BACKERSUBSCRIPTIONSWRITE: 'backer:subscriptions:write',
+    CREATORBENEFITSREAD: 'creator:benefits:read',
+    CREATORBENEFITSWRITE: 'creator:benefits:write',
     CREATORWEBHOOKSREAD: 'creator:webhooks:read',
     CREATORWEBHOOKSWRITE: 'creator:webhooks:write',
     BACKERWEBHOOKSREAD: 'backer:webhooks:read',
