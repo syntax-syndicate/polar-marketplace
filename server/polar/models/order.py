@@ -1,3 +1,4 @@
+import inspect
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -114,6 +115,10 @@ class Order(CustomFieldDataMixin, MetadataMixin, RecordModel):
         Uuid, ForeignKey("checkouts.id", ondelete="set null"), nullable=True, index=True
     )
 
+    @property
+    def total(self) -> int:
+        return self.amount + self.tax_amount
+
     @declared_attr
     def checkout(cls) -> Mapped["Checkout | None"]:
         return relationship("Checkout", lazy="raise")
@@ -144,14 +149,35 @@ class Order(CustomFieldDataMixin, MetadataMixin, RecordModel):
     def refundable_tax_amount(self) -> int:
         return self.tax_amount - self.refunded_tax_amount
 
-    def set_refunded(self, refunded_amount: int, refunded_tax_amount: int) -> None:
-        fully_refunded = (
-            refunded_amount == self.amount and refunded_tax_amount == self.tax_amount
+    def get_remaining_balance(self) -> int:
+        return self.refundable_amount + self.refundable_tax_amount
+
+    def increment_refunds(self, refunded_amount: int, refunded_tax_amount: int) -> None:
+        new_amount = self.refunded_amount + refunded_amount
+        new_tax_amount = self.refunded_tax_amount + refunded_tax_amount
+        exceeds_original_amount = (
+            new_amount > self.amount or new_tax_amount > self.tax_amount
         )
+        if exceeds_original_amount:
+            raise ValueError(
+                inspect.cleandoc(
+                    f"""
+                Order ({self.id}, amount: {self.amount}, tax: {self.tax_amount})
+                cannot be refunded with amount {new_amount} (+{refunded_amount})
+                and tax {new_tax_amount} (+{refunded_tax_amount})
+                """
+                )
+            )
+
         new_status = OrderStatus.partially_refunded
-        if fully_refunded:
+        if new_amount == self.amount:
             new_status = OrderStatus.refunded
 
         self.status = new_status
-        self.refunded_amount = refunded_amount
-        self.refunded_tax_amount = refunded_tax_amount
+        self.refunded_amount = new_amount
+        self.refunded_tax_amount = new_tax_amount
+
+    def set_refunded(self) -> None:
+        self.status = OrderStatus.refunded
+        self.refunded_amount = self.amount
+        self.refunded_tax_amount = self.tax_amount

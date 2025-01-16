@@ -15,7 +15,9 @@ from polar.models import (
     Transaction,
     UserOrganization,
 )
+from polar.models.order import OrderStatus
 from polar.models.refund import RefundReason
+from polar.order.service import order as order_service
 from polar.postgres import AsyncSession
 from polar.refund.schemas import RefundCreate
 from polar.refund.service import refund as refund_service
@@ -54,7 +56,7 @@ async def create_order_and_payment(
 
 
 class StripeRefund:
-    async def create(
+    async def calculate_and_create(
         self,
         client: AsyncClient,
         stripe_service_mock: MagicMock,
@@ -62,9 +64,29 @@ class StripeRefund:
         payment: Transaction,
         create_schema: RefundCreate,
     ) -> Response:
-        refund_amount, refund_tax_amount = refund_service.calculate_refund_amounts(
-            order, create_schema.amount
+        refund_amount = create_schema.amount
+        refund_tax_amount = refund_service.calculate_tax(order, refund_amount)
+        return await self.create(
+            client,
+            stripe_service_mock,
+            order,
+            payment,
+            create_schema,
+            refund_amount=refund_amount,
+            refund_tax_amount=refund_tax_amount,
         )
+
+    async def create(
+        self,
+        client: AsyncClient,
+        stripe_service_mock: MagicMock,
+        order: Order,
+        payment: Transaction,
+        create_schema: RefundCreate,
+        *,
+        refund_amount: int,
+        refund_tax_amount: int,
+    ) -> Response:
         if not payment.charge_id:
             raise RuntimeError()
 
@@ -76,9 +98,9 @@ class StripeRefund:
         response = await client.post(
             "/v1/refunds/",
             json={
-                "order_id": str(order.id),
-                "reason": str(RefundReason.service_disruption),
-                "amount": 1110,
+                "order_id": str(create_schema.order_id),
+                "reason": str(create_schema.reason),
+                "amount": refund_amount,
             },
         )
         return response
@@ -93,7 +115,7 @@ class StripeRefund:
         expected: dict[str, Any] = {},
         expected_status: int = 200,
     ) -> Response:
-        response = await self.create(
+        response = await self.calculate_and_create(
             client,
             stripe_service_mock,
             order,
@@ -111,6 +133,49 @@ class StripeRefund:
             assert data[k] == v
 
         return response
+
+    async def create_partial_order_refund(
+        self,
+        session: AsyncSession,
+        client: AsyncClient,
+        stripe_service_mock: MagicMock,
+        order: Order,
+        payment: Transaction,
+        *,
+        amount: int,
+        tax: int,
+    ) -> Order:
+        refunded_amount = order.refunded_amount
+        refunded_tax_amount = order.refunded_tax_amount
+
+        await self.create_and_assert(
+            client,
+            stripe_service_mock,
+            order,
+            payment,
+            RefundCreate(
+                order_id=order.id,
+                reason=RefundReason.service_disruption,
+                amount=amount,
+            ),
+            expected={
+                "status": "succeeded",
+                "reason": "service_disruption",
+                "amount": amount,
+                # Refunds round down to closest cent (conservative in aggregate)
+                "tax_amount": tax,
+            },
+        )
+        refunded_amount += amount
+        refunded_tax_amount += tax
+
+        updated = await order_service.get(session, order.id)
+        if not updated:
+            raise RuntimeError()
+
+        assert updated.refunded_amount == refunded_amount
+        assert updated.refunded_tax_amount == refunded_tax_amount
+        return updated
 
 
 @pytest.mark.asyncio
@@ -142,84 +207,53 @@ class TestCreatePartialRefunds(StripeRefund):
             product=product,
             customer=customer,
             amount=9_990,
-            # Technically 2_497.5, but rounds up (at Stripe too) at purchase
+            # Rounded up from 2_497.5. Stripe rounds cents too.
+            # Required and expected by tax authorities, e.g Sweden.
             tax_amount=2_498,
         )
 
-        await self.create_and_assert(
+        order = await self.create_partial_order_refund(
+            session,
             client,
             stripe_service_mock,
             order,
             payment,
-            RefundCreate(
-                order_id=order.id,
-                reason=RefundReason.service_disruption,
-                amount=1_110,
-            ),
-            expected={
-                "status": "succeeded",
-                "reason": "service_disruption",
-                "amount": 1_110,
-                # Refunds round down to closest cent (conservative in aggregate)
-                "tax_amount": 277,
-            },
+            amount=1110,
+            # Rounded up from 277.5
+            tax=278,
         )
+        assert order.status == OrderStatus.partially_refunded
 
-        # TODO: Check order stats to be reflective of refund progress
         # 8_880 remaining
-        await self.create_and_assert(
+        order = await self.create_partial_order_refund(
+            session,
             client,
             stripe_service_mock,
             order,
             payment,
-            RefundCreate(
-                order_id=order.id,
-                reason=RefundReason.service_disruption,
-                amount=993,
-            ),
-            expected={
-                "status": "succeeded",
-                "reason": "service_disruption",
-                "amount": 993,
-                "tax_amount": 248,
-            },
+            amount=993,
+            # Rounded down from 248.25
+            tax=248,
         )
+        assert order.status == OrderStatus.partially_refunded
 
         # 7_887 remaining
-        await self.create_and_assert(
+        order = await self.create_partial_order_refund(
+            session,
             client,
             stripe_service_mock,
             order,
             payment,
-            RefundCreate(
-                order_id=order.id,
-                reason=RefundReason.service_disruption,
-                amount=5_887,
-            ),
-            expected={
-                "status": "succeeded",
-                "reason": "service_disruption",
-                "amount": 5_887,
-                "tax_amount": 1_472,
-            },
+            amount=5887,
+            # Rounds up from 1471.75
+            tax=1472,
         )
+        assert order.status == OrderStatus.partially_refunded
 
         # 2_000 remaining
-        # Once we track order status - add test to refund too much
-        # await self.create_and_assert(
-        #     client,
-        #     stripe_service_mock,
-        #     order,
-        #     payment,
-        #     RefundCreate(
-        #         order_id=order.id,
-        #         reason=RefundReason.service_disruption,
-        #         amount=3_000,  # Too high
-        #     ),
-        #     expected_status=400,
-        # )
-
-        await self.create_and_assert(
+        amount_before_exceed_attempt = order.refunded_amount
+        tax_before_exceed_attempt = order.refunded_tax_amount
+        response = await self.create(
             client,
             stripe_service_mock,
             order,
@@ -227,12 +261,28 @@ class TestCreatePartialRefunds(StripeRefund):
             RefundCreate(
                 order_id=order.id,
                 reason=RefundReason.service_disruption,
-                amount=2_000,
+                amount=2001,
             ),
-            expected={
-                "status": "succeeded",
-                "reason": "service_disruption",
-                "amount": 2_000,
-                "tax_amount": 500,
-            },
+            refund_amount=2001,
+            # Rounds down from 500.25
+            refund_tax_amount=500,
         )
+        assert response.status_code == 400
+        order = await order_service.get(session, order.id)
+        assert order
+        assert order.refunded_amount == amount_before_exceed_attempt
+        assert order.refunded_tax_amount == tax_before_exceed_attempt
+        assert order.refundable_amount == 2000
+
+        # Still 2_000 remaining
+        order = await self.create_partial_order_refund(
+            session,
+            client,
+            stripe_service_mock,
+            order,
+            payment,
+            amount=2000,
+            tax=order.tax_amount - order.refunded_tax_amount,
+        )
+        assert order.status == OrderStatus.refunded
+        assert order.refunded

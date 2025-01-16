@@ -550,7 +550,7 @@ class OrderService(ResourceServiceReader[Order]):
                 order_id=order.id,
             )
 
-    async def set_refunded(
+    async def increment_refunds(
         self,
         session: AsyncSession,
         order: Order,
@@ -558,9 +558,10 @@ class OrderService(ResourceServiceReader[Order]):
         refunded_amount: int,
         refunded_tax_amount: int,
     ) -> Order:
-        order.set_refunded(refunded_amount, refunded_tax_amount=refunded_tax_amount)
+        order.increment_refunds(
+            refunded_amount, refunded_tax_amount=refunded_tax_amount
+        )
         session.add(order)
-        # Trigger webhooks
         return order
 
     async def _create_order_balance(

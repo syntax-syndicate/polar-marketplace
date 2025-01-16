@@ -1,4 +1,3 @@
-import math
 from typing import Literal, TypeAlias
 from uuid import UUID
 
@@ -46,14 +45,14 @@ class RefundUnknownPayment(ResourceNotFound):
     ) -> None:
         self.id = id
         message = f"Refund issued for unknown {payment_type}: {id}"
-        super().__init__(message)
+        super().__init__(message, 404)
 
 
 class RefundedAlready(RefundError):
     def __init__(self, order: Order) -> None:
         self.order = order
         message = f"Order is already fully refunded: {order.id}"
-        super().__init__(message)
+        super().__init__(message, 403)
 
 
 class RefundAmountTooHigh(RefundError):
@@ -62,7 +61,7 @@ class RefundAmountTooHigh(RefundError):
         message = (
             f"Refund amount exceeds remaining order balance: {order.refundable_amount}"
         )
-        super().__init__(message)
+        super().__init__(message, 400)
 
 
 class RefundService(ResourceServiceReader[Refund]):
@@ -76,10 +75,8 @@ class RefundService(ResourceServiceReader[Refund]):
         if order.refunded:
             raise RefundedAlready(order)
 
-        refund_amount, refund_tax_amount = self.calculate_refund_amounts(
-            order, create_schema.amount
-        )
-
+        refund_amount = create_schema.amount
+        refund_tax_amount = self.calculate_tax(order, create_schema.amount)
         payment = await payment_transaction_service.get_by_order_id(session, order.id)
         if not (payment and payment.charge_id):
             raise RefundUnknownPayment(order.id, payment_type="order")
@@ -97,24 +94,21 @@ class RefundService(ResourceServiceReader[Refund]):
         refund.comment = create_schema.comment
         return refund
 
-    def calculate_refund_amounts(
+    def calculate_tax(
         self,
         order: Order,
         refund_amount: int,
-    ) -> tuple[RefundAmount, RefundTaxAmount]:
+    ) -> int:
         if refund_amount > order.refundable_amount:
             raise RefundAmountTooHigh(order)
 
         # Trigger full refund of remaining balance
         if refund_amount == order.refundable_amount:
-            return (order.refundable_amount, order.refundable_tax_amount)
+            return order.refundable_tax_amount
 
         ratio = order.tax_amount / order.amount
-
-        # Casting to int rounds down second decimals to be consertive
-        # vs. risk refunding too much taxes in aggregate of partial refunds.
-        tax_amount = int(refund_amount * ratio)
-        return refund_amount, tax_amount
+        tax_amount = round(refund_amount * ratio)
+        return tax_amount
 
     ###############################################################################
     # STRIPE WEBHOOK HANDLERS
@@ -136,12 +130,11 @@ class RefundService(ResourceServiceReader[Refund]):
         )
 
         stripe_amount = charge.amount_refunded
-        refunded_amount, refunded_tax_amount, _ = (
-            self.calculate_refund_amounts_from_stripe(stripe_amount, payment)
-        )
-
         if order is not None:
-            await order_service.set_refunded(
+            refunded_amount, refunded_tax_amount = self.calculate_stripe_amounts(
+                order, stripe_amount=stripe_amount
+            )
+            await order_service.increment_refunds(
                 session,
                 order,
                 refunded_amount=refunded_amount,
@@ -151,38 +144,42 @@ class RefundService(ResourceServiceReader[Refund]):
             await pledge_service.refund_by_payment_id(
                 session=session,
                 payment_id=charge["payment_intent"],
-                amount=charge["amount_refunded"],
+                amount=stripe_amount,
                 transaction_id=charge["id"],
             )
 
         # TODO: Webhook for order.refunded
 
-    def calculate_refund_amounts_from_stripe(
-        self, stripe_amount: int, payment: Transaction
-    ) -> tuple[RefundAmount, RefundTaxAmount, FullRefund]:
-        total_amount = payment.amount + payment.tax_amount
+    def calculate_stripe_amounts(
+        self,
+        order: Order,
+        stripe_amount: int,
+    ) -> tuple[RefundAmount, RefundTaxAmount]:
+        remaining_balance = order.get_remaining_balance()
+        if stripe_amount == remaining_balance:
+            return order.refundable_amount, order.refundable_tax_amount
+
         refunded_tax_amount = abs(
-            int(math.floor(payment.tax_amount * stripe_amount) / total_amount)
+            round((order.tax_amount * stripe_amount) / order.total)
         )
         refunded_amount = stripe_amount - refunded_tax_amount
-
-        full_refund = (
-            refunded_amount == payment.amount
-            and refunded_tax_amount == payment.tax_amount
-        )
-        return refunded_amount, refunded_tax_amount, full_refund
+        return refunded_amount, refunded_tax_amount
 
     def build_instance_from_stripe(
         self,
         stripe_refund: stripe_lib.Refund,
         *,
-        payment: Transaction,
         order: Order | None = None,
         pledge: Pledge | None = None,
     ) -> Refund:
-        refunded_amount, refunded_tax_amount, _ = (
-            self.calculate_refund_amounts_from_stripe(stripe_refund.amount, payment)
-        )
+        refunded_amount = stripe_refund.amount
+        refunded_tax_amount = 0
+        # Pledges never have VAT
+        if order:
+            refunded_amount, refunded_tax_amount = self.calculate_stripe_amounts(
+                order,
+                stripe_amount=stripe_refund.amount,
+            )
 
         failure_reason = getattr(stripe_refund, "failure_reason", None)
         stripe_reason = stripe_refund.reason if stripe_refund.reason else "other"
@@ -212,11 +209,18 @@ class RefundService(ResourceServiceReader[Refund]):
 
         instance = self.build_instance_from_stripe(
             stripe_refund,
-            payment=payment,
             order=order,
             pledge=pledge,
         )
         session.add(instance)
+        if order is not None:
+            await order_service.increment_refunds(
+                session,
+                order,
+                refunded_amount=instance.amount,
+                refunded_tax_amount=instance.tax_amount,
+            )
+
         await refund_transaction_service.create(
             session,
             charge_id=charge_id,
@@ -231,6 +235,7 @@ class RefundService(ResourceServiceReader[Refund]):
             amount=instance.amount,
             tax_amount=instance.tax_amount,
             order_id=instance.order_id,
+            pledge_id=instance.pledge_id,
             reason=instance.reason,
             processor=instance.processor,
             processor_id=instance.processor_id,
@@ -247,7 +252,6 @@ class RefundService(ResourceServiceReader[Refund]):
         charge_id, payment, order, pledge = resources
         updated = self.build_instance_from_stripe(
             stripe_refund,
-            payment=payment,
             order=order,
             pledge=pledge,
         )
