@@ -577,18 +577,6 @@ class StripeService:
             reason=reason,
         )
 
-    async def list_refunds(
-        self,
-        *,
-        charge: str | None = None,
-    ) -> AsyncIterator[stripe_lib.Refund]:
-        params: stripe_lib.Refund.ListParams = {"limit": 100}
-        if charge is not None:
-            params["charge"] = charge
-
-        result = await stripe_lib.Refund.list_async(**params)
-        return result.auto_paging_iter()
-
     async def get_charge(
         self,
         id: str,

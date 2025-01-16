@@ -1,5 +1,4 @@
 import math
-from collections.abc import Sequence
 
 from sqlalchemy import select
 
@@ -18,21 +17,6 @@ class RefundTransactionError(BaseTransactionServiceError): ...
 
 
 class RefundTransactionService(BaseTransactionService):
-    async def get_by_charge_id(
-        self, session: AsyncSession, charge_id: str
-    ) -> Sequence[Transaction]:
-        statement = (
-            select(Transaction)
-            .where(
-                Transaction.type == TransactionType.refund,
-                Transaction.charge_id == charge_id,
-            )
-            .order_by(Transaction.created_at.asc())
-        )
-        result = await session.execute(statement)
-        refunds = result.scalars().all()
-        return refunds
-
     async def get_by_refund_id(
         self, session: AsyncSession, refund_id: str
     ) -> Transaction | None:
