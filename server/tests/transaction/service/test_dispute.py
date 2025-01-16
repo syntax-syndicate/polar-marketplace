@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-import stripe as stripe_lib
 from pytest_mock import MockerFixture
 
 from polar.enums import AccountType
@@ -24,63 +23,12 @@ from polar.transaction.service.dispute import (
 from polar.transaction.service.platform_fee import PlatformFeeTransactionService
 from polar.transaction.service.processor_fee import ProcessorFeeTransactionService
 from tests.fixtures.database import SaveFixture
+from tests.fixtures.stripe import (
+    build_stripe_balance_transaction,
+    build_stripe_charge,
+    build_stripe_dispute,
+)
 from tests.transaction.conftest import create_transaction
-
-
-def build_stripe_balance_transaction(
-    *, reporting_category: str, fee: int | None = 100
-) -> stripe_lib.BalanceTransaction:
-    return stripe_lib.BalanceTransaction.construct_from(
-        {
-            "id": "STRIPE_BALANCE_TRANSACTION_ID",
-            "reporting_category": reporting_category,
-            "fee": fee,
-        },
-        None,
-    )
-
-
-def build_stripe_charge(
-    *,
-    amount: int = 1000,
-    customer: str | None = None,
-    invoice: str | None = None,
-    payment_intent: str | None = None,
-    balance_transaction: str | None = None,
-) -> stripe_lib.Charge:
-    return stripe_lib.Charge.construct_from(
-        {
-            "id": "STRIPE_CHARGE_ID",
-            "customer": customer,
-            "currency": "usd",
-            "amount": amount,
-            "invoice": invoice,
-            "payment_intent": payment_intent,
-            "balance_transaction": balance_transaction,
-        },
-        None,
-    )
-
-
-def build_stripe_dispute(
-    *,
-    status: str,
-    id: str = "STRIPE_DISPUTE_ID",
-    charge_id: str = "STRIPE_CHARGE_ID",
-    amount: int = 100,
-    balance_transactions: list[stripe_lib.BalanceTransaction],
-) -> stripe_lib.Dispute:
-    return stripe_lib.Dispute.construct_from(
-        {
-            "id": id,
-            "status": status,
-            "charge": charge_id,
-            "currency": "usd",
-            "amount": amount,
-            "balance_transactions": balance_transactions,
-        },
-        None,
-    )
 
 
 @pytest.fixture(autouse=True)

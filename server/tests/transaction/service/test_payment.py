@@ -1,8 +1,7 @@
-from typing import Any, cast
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-import stripe as stripe_lib
 from pytest_mock import MockerFixture
 from sqlalchemy.orm import joinedload
 
@@ -20,61 +19,7 @@ from polar.transaction.service.payment import (
 )
 from polar.transaction.service.processor_fee import ProcessorFeeTransactionService
 from tests.fixtures.database import SaveFixture
-
-
-def build_stripe_balance_transaction(
-    *,
-    fee: int | None = 100,
-) -> stripe_lib.BalanceTransaction:
-    return stripe_lib.BalanceTransaction.construct_from(
-        {"id": "STRIPE_BALANCE_TRANSACTION_ID", "fee": fee}, None
-    )
-
-
-def build_stripe_invoice(
-    *, tax: int | None = 100, subscription: str | None = None
-) -> stripe_lib.Invoice:
-    return stripe_lib.Invoice.construct_from(
-        {
-            "id": "STRIPE_INVOICE_ID",
-            "tax": tax,
-            "subscription": subscription,
-            "total_tax_amounts": [{"tax_rate": {"country": "US", "state": "NY"}}],
-            "metadata": None,
-        },
-        None,
-    )
-
-
-def build_stripe_charge(
-    *,
-    customer: str | None = None,
-    invoice: str | None = None,
-    payment_intent: str | None = None,
-    balance_transaction: str | None = None,
-    type: ProductType | None = None,
-    metadata: dict[str, str] | None = None,
-    risk_level: str | None = None,
-    risk_score: int | None = None,
-) -> stripe_lib.Charge:
-    metadata = metadata or {}
-    obj: dict[str, Any] = {
-        "id": "STRIPE_CHARGE_ID",
-        "customer": customer,
-        "currency": "usd",
-        "amount": 1100,
-        "invoice": invoice,
-        "payment_intent": payment_intent,
-        "balance_transaction": balance_transaction,
-        "metadata": {"type": type, **metadata} if type is not None else metadata,
-    }
-    if risk_level or risk_score:
-        obj["outcome"] = {
-            "risk_level": risk_level if risk_level else "normal",
-            "risk_score": risk_score if risk_score else 0,
-        }
-
-    return stripe_lib.Charge.construct_from(obj, None)
+from tests.fixtures.stripe import build_stripe_balance_transaction, build_stripe_charge
 
 
 @pytest.fixture(autouse=True)

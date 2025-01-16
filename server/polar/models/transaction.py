@@ -15,6 +15,7 @@ if TYPE_CHECKING:
         Order,
         Organization,
         Pledge,
+        Refund,
         User,
     )
 
@@ -366,6 +367,20 @@ class Transaction(RecordModel):
             foreign_keys="[Transaction.payment_transaction_id]",
             back_populates="balance_transactions",
         )
+
+    # TODO: Hopefully temporary naming. Want to prefix all processor IDs
+    # with `processor_` here and be able to rename this then to `refund_id`
+    polar_refund_id: Mapped[UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("refunds.id", ondelete="set null"),
+        nullable=True,
+        index=True,
+    )
+    """ID of the `Refund` related to this transaction."""
+
+    @declared_attr
+    def refund(cls) -> Mapped["Refund | None"]:
+        return relationship("Refund", lazy="raise")
 
     @declared_attr
     def balance_transactions(cls) -> Mapped[list["Transaction"]]:

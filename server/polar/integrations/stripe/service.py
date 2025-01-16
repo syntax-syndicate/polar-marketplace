@@ -564,6 +564,19 @@ class StripeService:
         result = await stripe_lib.BalanceTransaction.list_async(**params)
         return result.auto_paging_iter()
 
+    async def create_refund(
+        self,
+        *,
+        charge_id: str,
+        amount: int,
+        reason: Literal["duplicate", "requested_by_customer"],
+    ) -> stripe_lib.Refund:
+        return await stripe_lib.Refund.create_async(
+            charge=charge_id,
+            amount=amount,
+            reason=reason,
+        )
+
     async def list_refunds(
         self,
         *,

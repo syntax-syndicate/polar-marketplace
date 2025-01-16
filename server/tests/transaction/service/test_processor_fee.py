@@ -7,13 +7,18 @@ import stripe as stripe_lib
 from pytest_mock import MockerFixture
 
 from polar.integrations.stripe.service import StripeService
-from polar.models import IssueReward, Order, Pledge, Transaction
+from polar.models import Transaction
 from polar.models.transaction import PaymentProcessor, ProcessorFeeType, TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.service.processor_fee import (
     processor_fee_transaction as processor_fee_transaction_service,
 )
 from tests.fixtures.database import SaveFixture
+from tests.fixtures.random_objects import (
+    create_dispute_transaction,
+    create_payment_transaction,
+    create_refund_transaction,
+)
 from tests.transaction.conftest import create_async_iterator
 
 
@@ -22,94 +27,6 @@ def stripe_service_mock(mocker: MockerFixture) -> MagicMock:
     mock = MagicMock(spec=StripeService)
     mocker.patch("polar.transaction.service.processor_fee.stripe_service", new=mock)
     return mock
-
-
-async def create_payment_transaction(
-    save_fixture: SaveFixture,
-    *,
-    processor: PaymentProcessor = PaymentProcessor.stripe,
-    currency: str = "usd",
-    amount: int = 1000,
-    charge_id: str | None = "STRIPE_CHARGE_ID",
-    pledge: Pledge | None = None,
-    order: Order | None = None,
-    issue_reward: IssueReward | None = None,
-) -> Transaction:
-    transaction = Transaction(
-        type=TransactionType.payment,
-        processor=processor,
-        currency=currency,
-        amount=amount,
-        account_currency=currency,
-        account_amount=amount,
-        tax_amount=0,
-        charge_id=charge_id,
-        pledge=pledge,
-        order=order,
-        issue_reward=issue_reward,
-    )
-    await save_fixture(transaction)
-    return transaction
-
-
-async def create_refund_transaction(
-    save_fixture: SaveFixture,
-    *,
-    processor: PaymentProcessor = PaymentProcessor.stripe,
-    currency: str = "usd",
-    amount: int = 1000,
-    charge_id: str | None = "STRIPE_CHARGE_ID",
-    refund_id: str | None = "STRIPE_REFUND_ID",
-    pledge: Pledge | None = None,
-    order: Order | None = None,
-    issue_reward: IssueReward | None = None,
-) -> Transaction:
-    transaction = Transaction(
-        type=TransactionType.dispute,
-        processor=processor,
-        currency=currency,
-        amount=amount,
-        account_currency=currency,
-        account_amount=amount,
-        tax_amount=0,
-        charge_id=charge_id,
-        refund_id=refund_id,
-        pledge=pledge,
-        order=order,
-        issue_reward=issue_reward,
-    )
-    await save_fixture(transaction)
-    return transaction
-
-
-async def create_dispute_transaction(
-    save_fixture: SaveFixture,
-    *,
-    processor: PaymentProcessor = PaymentProcessor.stripe,
-    currency: str = "usd",
-    amount: int = 1000,
-    charge_id: str | None = "STRIPE_CHARGE_ID",
-    dispute_id: str | None = "STRIPE_DISPUTE_ID",
-    pledge: Pledge | None = None,
-    order: Order | None = None,
-    issue_reward: IssueReward | None = None,
-) -> Transaction:
-    transaction = Transaction(
-        type=TransactionType.dispute,
-        processor=processor,
-        currency=currency,
-        amount=amount,
-        account_currency=currency,
-        account_amount=amount,
-        tax_amount=0,
-        charge_id=charge_id,
-        dispute_id=dispute_id,
-        pledge=pledge,
-        order=order,
-        issue_reward=issue_reward,
-    )
-    await save_fixture(transaction)
-    return transaction
 
 
 @pytest.mark.asyncio

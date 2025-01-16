@@ -3,7 +3,7 @@ from typing import Literal
 
 from polar.integrations.stripe.service import stripe as stripe_service
 from polar.integrations.stripe.utils import get_expandable_id
-from polar.models import Transaction
+from polar.models import Refund, Transaction
 from polar.models.transaction import PaymentProcessor, ProcessorFeeType, TransactionType
 from polar.postgres import AsyncSession
 
@@ -89,28 +89,30 @@ class ProcessorFeeTransactionService(BaseTransactionService):
         self,
         session: AsyncSession,
         *,
+        refund: Refund,
         refund_transaction: Transaction,
     ) -> list[Transaction]:
         fee_transactions: list[Transaction] = []
 
-        if refund_transaction.processor != PaymentProcessor.stripe:
+        if (
+            refund.processor != PaymentProcessor.stripe
+            and refund_transaction.processor != PaymentProcessor.stripe
+        ):
             return fee_transactions
 
         if refund_transaction.refund_id is None:
             return fee_transactions
 
-        refund = await stripe_service.get_refund(refund_transaction.refund_id)
-
-        if refund.balance_transaction is None:
+        if refund.processor_balance_transaction_id is None:
             return fee_transactions
 
         balance_transaction = await stripe_service.get_balance_transaction(
-            get_expandable_id(refund.balance_transaction)
+            refund.processor_balance_transaction_id,
         )
 
         refund_fee_transaction = Transaction(
             type=TransactionType.processor_fee,
-            processor=PaymentProcessor.stripe,
+            processor=refund_transaction.processor,
             processor_fee_type=ProcessorFeeType.refund,
             currency=refund_transaction.currency,
             amount=-balance_transaction.fee,
