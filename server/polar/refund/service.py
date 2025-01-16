@@ -122,34 +122,6 @@ class RefundService(ResourceServiceReader[Refund]):
             return await self._update_from_stripe(session, refund, stripe_refund)
         return await self._create_from_stripe(session, stripe_refund)
 
-    async def handle_refunded_stripe_charge(
-        self, session: AsyncSession, charge: stripe_lib.Charge
-    ) -> None:
-        _, payment, order, pledge = await self._get_resources_from_stripe_charge(
-            session, charge
-        )
-
-        stripe_amount = charge.amount_refunded
-        if order is not None:
-            refunded_amount, refunded_tax_amount = self.calculate_stripe_amounts(
-                order, stripe_amount=stripe_amount
-            )
-            await order_service.increment_refunds(
-                session,
-                order,
-                refunded_amount=refunded_amount,
-                refunded_tax_amount=refunded_tax_amount,
-            )
-        elif pledge is not None:
-            await pledge_service.refund_by_payment_id(
-                session=session,
-                payment_id=charge["payment_intent"],
-                amount=stripe_amount,
-                transaction_id=charge["id"],
-            )
-
-        # TODO: Webhook for order.refunded
-
     def calculate_stripe_amounts(
         self,
         order: Order,
@@ -204,7 +176,7 @@ class RefundService(ResourceServiceReader[Refund]):
     async def _create_from_stripe(
         self, session: AsyncSession, stripe_refund: stripe_lib.Refund
     ) -> Refund:
-        resources = await self._get_resources_from_stripe_refund(session, stripe_refund)
+        resources = await self._get_resources(session, stripe_refund)
         charge_id, payment, order, pledge = resources
 
         instance = self.build_instance_from_stripe(
@@ -248,7 +220,7 @@ class RefundService(ResourceServiceReader[Refund]):
         refund: Refund,
         stripe_refund: stripe_lib.Refund,
     ) -> Refund:
-        resources = await self._get_resources_from_stripe_refund(session, stripe_refund)
+        resources = await self._get_resources(session, stripe_refund)
         charge_id, payment, order, pledge = resources
         updated = self.build_instance_from_stripe(
             stripe_refund,
@@ -292,24 +264,14 @@ class RefundService(ResourceServiceReader[Refund]):
         await session.flush()
         return refund
 
-    async def _get_resources_from_stripe_refund(
+    async def _get_resources(
         self, session: AsyncSession, refund: stripe_lib.Refund
     ) -> RefundedResources:
         if not refund.charge:
             raise RefundUnknownPayment(refund.id, payment_type="charge")
 
+        charge_id = str(refund.charge)
         payment_intent = str(refund.payment_intent) if refund.payment_intent else None
-        return await self._get_resources(session, str(refund.charge), payment_intent)
-
-    async def _get_resources_from_stripe_charge(
-        self, session: AsyncSession, charge: stripe_lib.Charge
-    ) -> RefundedResources:
-        payment_intent = str(charge.payment_intent) if charge.payment_intent else None
-        return await self._get_resources(session, str(charge.id), payment_intent)
-
-    async def _get_resources(
-        self, session: AsyncSession, charge_id: str, payment_intent: str | None
-    ) -> RefundedResources:
         payment = await payment_transaction_service.get_by_charge_id(session, charge_id)
         if payment is None:
             raise RefundUnknownPayment(charge_id, payment_type="charge")

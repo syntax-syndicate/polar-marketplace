@@ -20,7 +20,6 @@ DIRECT_IMPLEMENTED_WEBHOOKS = {
     "payment_intent.succeeded",
     "payment_intent.payment_failed",
     "charge.succeeded",
-    "charge.refunded",
     "charge.dispute.closed",
     "refund.created",
     "refund.updated",
