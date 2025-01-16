@@ -207,9 +207,10 @@ class TestCreateRefunds:
         )
         assert len(refund_transactions) == 0
 
-        created_refunds, updated_refunds = (
-            await refund_service.upsert_from_stripe_charge(session, charge=charge)
-        )
+        (
+            created_refunds,
+            updated_refunds,
+        ) = await refund_service.upsert_from_stripe_charge(session, charge=charge)
         assert len(created_refunds) == 1
         assert len(updated_refunds) == 1
 

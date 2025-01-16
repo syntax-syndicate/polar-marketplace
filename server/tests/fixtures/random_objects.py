@@ -73,7 +73,7 @@ from polar.models.order import OrderBillingReason
 from polar.models.pledge import Pledge, PledgeState, PledgeType
 from polar.models.product_price import HasPriceCurrency, ProductPriceType
 from polar.models.subscription import SubscriptionStatus
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.models.user import OAuthAccount, OAuthPlatform
 from tests.fixtures.database import SaveFixture
 
