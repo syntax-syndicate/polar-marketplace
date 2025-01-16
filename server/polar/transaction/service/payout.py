@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from polar.account.service import account as account_service
 from polar.config import settings
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.integrations.stripe.service import stripe as stripe_service
 from polar.integrations.stripe.utils import get_expandable_id
 from polar.kit.csv import IterableCSVWriter
@@ -17,7 +17,7 @@ from polar.kit.db.postgres import AsyncSessionMaker
 from polar.kit.utils import generate_uuid, utc_now
 from polar.logging import Logger
 from polar.models import Account, Issue, Order, Pledge, Transaction
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.schemas import PayoutEstimate
 from polar.worker import enqueue_job

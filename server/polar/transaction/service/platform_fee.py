@@ -5,11 +5,11 @@ import structlog
 from sqlalchemy import select
 
 from polar.account.service import account as account_service
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.integrations.stripe.service import stripe as stripe_service
 from polar.logging import Logger
 from polar.models import Account, Transaction
-from polar.models.transaction import PaymentProcessor, PlatformFeeType, TransactionType
+from polar.models.transaction import PlatformFeeType, TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.fees.stripe import (
     get_reverse_stripe_payout_fees,

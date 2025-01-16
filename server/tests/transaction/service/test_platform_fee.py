@@ -7,7 +7,7 @@ import stripe as stripe_lib
 from pytest_mock import MockerFixture
 from sqlalchemy.orm import joinedload
 
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.integrations.stripe.service import StripeService
 from polar.models import (
     Account,
@@ -19,7 +19,6 @@ from polar.models import (
     User,
 )
 from polar.models.transaction import (
-    PaymentProcessor,
     PlatformFeeType,
     ProcessorFeeType,
     TransactionType,

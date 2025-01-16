@@ -6,9 +6,10 @@ import pytest
 import stripe as stripe_lib
 from pytest_mock import MockerFixture
 
+from polar.enums import PaymentProcessor
 from polar.integrations.stripe.service import StripeService
-from polar.models import Transaction
-from polar.models.transaction import PaymentProcessor, ProcessorFeeType, TransactionType
+from polar.models import Customer, Product, Transaction
+from polar.models.transaction import ProcessorFeeType, TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.service.processor_fee import (
     processor_fee_transaction as processor_fee_transaction_service,
@@ -16,7 +17,9 @@ from polar.transaction.service.processor_fee import (
 from tests.fixtures.database import SaveFixture
 from tests.fixtures.random_objects import (
     create_dispute_transaction,
+    create_order,
     create_payment_transaction,
+    create_refund,
     create_refund_transaction,
 )
 from tests.transaction.conftest import create_async_iterator
@@ -105,8 +108,21 @@ class TestCreatePaymentFees:
 @pytest.mark.asyncio
 class TestCreateRefundFees:
     async def test_not_stripe(
-        self, session: AsyncSession, save_fixture: SaveFixture
+        self,
+        session: AsyncSession,
+        save_fixture: SaveFixture,
+        customer: Customer,
+        product: Product,
     ) -> None:
+        order = await create_order(
+            save_fixture,
+            product=product,
+            customer=customer,
+        )
+        refund = await create_refund(
+            save_fixture,
+            order,
+        )
         refund_transaction = await create_refund_transaction(
             save_fixture, processor=PaymentProcessor.open_collective
         )
@@ -115,13 +131,26 @@ class TestCreateRefundFees:
         session.expunge_all()
 
         fee_transactions = await processor_fee_transaction_service.create_refund_fees(
-            session, refund_transaction=refund_transaction
+            session, refund=refund, refund_transaction=refund_transaction
         )
         assert len(fee_transactions) == 0
 
     async def test_stripe_no_refund_id(
-        self, session: AsyncSession, save_fixture: SaveFixture
+        self,
+        session: AsyncSession,
+        save_fixture: SaveFixture,
+        customer: Customer,
+        product: Product,
     ) -> None:
+        order = await create_order(
+            save_fixture,
+            product=product,
+            customer=customer,
+        )
+        refund = await create_refund(
+            save_fixture,
+            order,
+        )
         refund_transaction = await create_refund_transaction(
             save_fixture, refund_id=None
         )
@@ -130,7 +159,7 @@ class TestCreateRefundFees:
         session.expunge_all()
 
         fee_transactions = await processor_fee_transaction_service.create_refund_fees(
-            session, refund_transaction=refund_transaction
+            session, refund=refund, refund_transaction=refund_transaction
         )
         assert len(fee_transactions) == 0
 
@@ -139,19 +168,19 @@ class TestCreateRefundFees:
         session: AsyncSession,
         save_fixture: SaveFixture,
         stripe_service_mock: MagicMock,
+        customer: Customer,
+        product: Product,
     ) -> None:
-        refund_transaction = await create_refund_transaction(save_fixture)
-
-        stripe_service_mock.get_refund.return_value = stripe_lib.Refund.construct_from(
-            {
-                "id": "STRIPE_REFUND_ID",
-                "charge": "STRIPE_CHARGE_ID",
-                "currency": "usd",
-                "amount": 100,
-                "balance_transaction": "STRIPE_BALANCE_TRANSACTION_ID",
-            },
-            None,
+        order = await create_order(
+            save_fixture,
+            product=product,
+            customer=customer,
         )
+        refund = await create_refund(
+            save_fixture,
+            order,
+        )
+        refund_transaction = await create_refund_transaction(save_fixture)
         stripe_service_mock.get_balance_transaction.return_value = (
             stripe_lib.BalanceTransaction.construct_from(
                 {"id": "STRIPE_BALANCE_TRANSACTION_ID", "fee": 100}, None
@@ -162,7 +191,7 @@ class TestCreateRefundFees:
         session.expunge_all()
 
         fee_transactions = await processor_fee_transaction_service.create_refund_fees(
-            session, refund_transaction=refund_transaction
+            session, refund=refund, refund_transaction=refund_transaction
         )
         assert len(fee_transactions) == 1
 

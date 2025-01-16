@@ -37,6 +37,7 @@ from polar.models import (
     ProductPriceCustom,
     ProductPriceFixed,
     ProductPriceFree,
+    Refund,
     Repository,
     Subscription,
     Transaction,
@@ -1378,6 +1379,35 @@ async def create_benefit_grant(
     return grant
 
 
+async def create_refund(
+    save_fixture: SaveFixture,
+    order: Order,
+    *,
+    status: str = "succeeded",
+    processor: PaymentProcessor = PaymentProcessor.stripe,
+    amount: int = 1000,
+    tax_amount: int = 0,
+    reason: str = "customer_request",
+    processor_id: str = "STRIPE_REFUND_ID",
+    processor_reason: str = "requested_by_customer",
+    processor_balance_transaction_id: str = "STRIPE_BALANCE_TRANSACTION_ID",
+) -> Refund:
+    refund = Refund(
+        status=status,
+        reason=reason,
+        amount=amount,
+        tax_amount=tax_amount,
+        currency="usd",
+        order_id=order.id,
+        processor=processor,
+        processor_id=processor_id,
+        processor_reason=processor_reason,
+        processor_balance_transaction_id=processor_balance_transaction_id,
+    )
+    await save_fixture(refund)
+    return refund
+
+
 async def create_advertisement_campaign(
     save_fixture: SaveFixture, *, user: User
 ) -> AdvertisementCampaign:
@@ -1398,7 +1428,7 @@ async def create_payment_transaction(
     currency: str = "usd",
     amount: int = 1000,
     tax_amount: int = 0,
-    charge_id: str = "STRIPE_CHARGE_ID",
+    charge_id: str | None = "STRIPE_CHARGE_ID",
     pledge: Pledge | None = None,
     order: Order | None = None,
     issue_reward: IssueReward | None = None,
@@ -1427,7 +1457,7 @@ async def create_refund_transaction(
     processor: PaymentProcessor = PaymentProcessor.stripe,
     amount: int = -1000,
     charge_id: str = "STRIPE_CHARGE_ID",
-    refund_id: str = "STRIPE_REFUND_ID",
+    refund_id: str | None = "STRIPE_REFUND_ID",
     pledge: Pledge | None = None,
     order: Order | None = None,
     issue_reward: IssueReward | None = None,

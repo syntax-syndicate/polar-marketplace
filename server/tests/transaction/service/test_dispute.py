@@ -3,9 +3,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.models import Account, Pledge, Transaction, User
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.service.balance import BalanceTransactionService
 from polar.transaction.service.balance import (

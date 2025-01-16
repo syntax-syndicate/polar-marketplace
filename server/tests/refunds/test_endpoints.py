@@ -268,7 +268,7 @@ class TestCreatePartialRefunds(StripeRefund):
             refund_tax_amount=500,
         )
         assert response.status_code == 400
-        order = await order_service.get(session, order.id)
+        order = await order_service.get(session, order.id)  # type: ignore
         assert order
         assert order.refunded_amount == amount_before_exceed_attempt
         assert order.refunded_tax_amount == tax_before_exceed_attempt

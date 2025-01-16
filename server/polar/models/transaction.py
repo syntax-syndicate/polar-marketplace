@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
+from polar.enums import PaymentProcessor
 from polar.kit.db.models import RecordModel
 
 if TYPE_CHECKING:
@@ -39,15 +40,6 @@ class TransactionType(StrEnum):
     """Money flow between Polar and a user's account."""
     payout = "payout"
     """Money paid to the user's bank account."""
-
-
-class PaymentProcessor(StrEnum):
-    """
-    Supported payment processors.
-    """
-
-    stripe = "stripe"
-    open_collective = "open_collective"
 
 
 class ProcessorFeeType(StrEnum):

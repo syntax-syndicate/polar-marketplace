@@ -9,11 +9,11 @@ from pytest_mock import MockerFixture
 from sqlalchemy import select
 
 from polar.config import settings
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.integrations.stripe.service import StripeService
 from polar.kit.utils import utc_now
 from polar.models import Account, Organization, Transaction, User
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.service.payout import (
     InsufficientBalance,

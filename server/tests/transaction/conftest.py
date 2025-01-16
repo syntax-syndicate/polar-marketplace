@@ -4,7 +4,7 @@ from typing import TypeVar
 
 import pytest_asyncio
 
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.models import (
     Account,
     Customer,
@@ -19,7 +19,7 @@ from polar.models import (
     User,
 )
 from polar.models.pledge import PledgeType
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from tests.fixtures.database import SaveFixture
 from tests.fixtures.random_objects import (
     create_order,

@@ -4,6 +4,7 @@ import pytest
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
+from polar.enums import PaymentProcessor
 from polar.models import (
     Account,
     Organization,
@@ -12,7 +13,7 @@ from polar.models import (
     User,
     UserOrganization,
 )
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.endpoints import (  # type: ignore[attr-defined]
     payout_transaction_service,

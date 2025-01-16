@@ -129,17 +129,7 @@ class Order(CustomFieldDataMixin, MetadataMixin, RecordModel):
 
     @declared_attr
     def refunds(cls) -> Mapped[list["Refund"]]:
-        return relationship(
-            "Refund",
-            lazy="selectin",
-            primaryjoin=(
-                "and_("
-                "Refund.order_id == Order.id, "
-                "Refund.status == 'succeeded'"
-                ")"
-            ),
-            viewonly=True,
-        )
+        return relationship("Refund", lazy="raise")
 
     @property
     def refundable_amount(self) -> int:

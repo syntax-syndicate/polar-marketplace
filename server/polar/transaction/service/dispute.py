@@ -3,9 +3,10 @@ import math
 import stripe as stripe_lib
 from sqlalchemy import select
 
+from polar.enums import PaymentProcessor
 from polar.integrations.stripe.utils import get_expandable_id
 from polar.models import Transaction
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 
 from .balance import balance_transaction as balance_transaction_service

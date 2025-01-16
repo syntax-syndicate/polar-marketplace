@@ -8,6 +8,8 @@ class Platforms(StrEnum):
 
 class PaymentProcessor(StrEnum):
     stripe = "stripe"
+    # Only used for payouts (legacy)
+    open_collective = "open_collective"
 
 
 class AccountType(StrEnum):

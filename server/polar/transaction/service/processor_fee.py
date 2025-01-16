@@ -1,10 +1,11 @@
 from datetime import UTC, datetime
 from typing import Literal
 
+from polar.enums import PaymentProcessor
 from polar.integrations.stripe.service import stripe as stripe_service
 from polar.integrations.stripe.utils import get_expandable_id
 from polar.models import Refund, Transaction
-from polar.models.transaction import PaymentProcessor, ProcessorFeeType, TransactionType
+from polar.models.transaction import ProcessorFeeType, TransactionType
 from polar.postgres import AsyncSession
 
 from .base import BaseTransactionService, BaseTransactionServiceError
@@ -94,10 +95,9 @@ class ProcessorFeeTransactionService(BaseTransactionService):
     ) -> list[Transaction]:
         fee_transactions: list[Transaction] = []
 
-        if (
-            refund.processor != PaymentProcessor.stripe
-            and refund_transaction.processor != PaymentProcessor.stripe
-        ):
+        is_stripe_refund = refund.processor == PaymentProcessor.stripe
+        is_stripe_refund_trx = refund_transaction.processor == PaymentProcessor.stripe
+        if not (is_stripe_refund and is_stripe_refund_trx):
             return fee_transactions
 
         if refund_transaction.refund_id is None:

@@ -1,9 +1,9 @@
 from pydantic import UUID4
 
-from polar.enums import Platforms
+from polar.enums import PaymentProcessor, Platforms
 from polar.kit.schemas import IDSchema, Schema, TimestampedSchema
 from polar.models.pledge import PledgeState
-from polar.models.transaction import PaymentProcessor, PlatformFeeType, TransactionType
+from polar.models.transaction import PlatformFeeType, TransactionType
 from polar.product.schemas import ProductPrice
 
 

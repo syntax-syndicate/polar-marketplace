@@ -5,10 +5,11 @@ import pytest
 from pytest_mock import MockerFixture
 from sqlalchemy.orm import joinedload
 
+from polar.enums import PaymentProcessor
 from polar.integrations.stripe.schemas import ProductType
 from polar.integrations.stripe.service import StripeService
 from polar.models import Customer, Pledge, Transaction
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.transaction.service.payment import (  # type: ignore[attr-defined]
     PledgeDoesNotExist,

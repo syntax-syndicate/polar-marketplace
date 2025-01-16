@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from polar.enums import AccountType
+from polar.enums import AccountType, PaymentProcessor
 from polar.integrations.stripe.service import StripeService
 from polar.models import Account, Customer, Product, Transaction, User
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from polar.refund.service import refund as refund_service
 from polar.transaction.service.balance import BalanceTransactionService

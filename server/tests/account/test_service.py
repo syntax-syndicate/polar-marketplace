@@ -2,8 +2,9 @@ import pytest
 from pytest_mock import MockerFixture
 
 from polar.account.service import account as account_service
+from polar.enums import PaymentProcessor
 from polar.models import Account, Transaction, User
-from polar.models.transaction import PaymentProcessor, TransactionType
+from polar.models.transaction import TransactionType
 from polar.postgres import AsyncSession
 from tests.account.conftest import create_account
 from tests.fixtures.database import SaveFixture
