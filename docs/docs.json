@@ -25,7 +25,10 @@
         "groups": [
           {
             "group": "Bootup",
-            "pages": ["introduction", "migrate"]
+            "pages": [
+              "introduction",
+              "migrate"
+            ]
           },
           {
             "group": "Features",
@@ -287,7 +290,9 @@
               "api-reference/customer-portal/get-organization",
               {
                 "group": "Sessions",
-                "pages": ["api-reference/customer-portal/sessions/create"]
+                "pages": [
+                  "api-reference/customer-portal/sessions/create"
+                ]
               },
               {
                 "group": "Subscriptions",
@@ -392,7 +397,9 @@
                   },
                   {
                     "group": "Organization",
-                    "pages": ["api-reference/webhooks/organization.updated"]
+                    "pages": [
+                      "api-reference/webhooks/organization.updated"
+                    ]
                   }
                 ]
               }
@@ -431,7 +438,9 @@
         "groups": [
           {
             "group": "Changelog",
-            "pages": ["changelog/recent"]
+            "pages": [
+              "changelog/recent"
+            ]
           }
         ]
       },
@@ -441,7 +450,9 @@
         "groups": [
           {
             "group": "Contact Us",
-            "pages": ["support"]
+            "pages": [
+              "support"
+            ]
           }
         ]
       }
