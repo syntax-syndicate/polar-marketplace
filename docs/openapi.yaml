@@ -1058,7 +1058,7 @@
           {
             "lang": "go",
             "label": "Go (SDK)",
-            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Subscriptions.Update(ctx, \"<value>\", components.CreateSubscriptionUpdateSubscriptionCancel(\n        components.SubscriptionCancel{},\n    ))\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Subscription != nil {\n        // handle response\n    }\n}"
+            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Subscriptions.Update(ctx, \"<value>\", components.CreateSubscriptionUpdateSubscriptionCancel(\n        components.SubscriptionCancel{\n            CancelAtPeriodEnd: false,\n        },\n    ))\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Subscription != nil {\n        // handle response\n    }\n}"
           },
           {
             "lang": "python",
@@ -1073,7 +1073,7 @@
           {
             "lang": "php",
             "label": "PHP (SDK)",
-            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n\n\n$response = $sdk->subscriptions->update(\n    id: '<value>',\n    subscriptionUpdate: new Components\\SubscriptionCancel()\n\n);\n\nif ($response->subscription !== null) {\n    // handle response\n}"
+            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n\n\n$response = $sdk->subscriptions->update(\n    id: '<value>',\n    subscriptionUpdate: new Components\\SubscriptionRevoke()\n\n);\n\nif ($response->subscription !== null) {\n    // handle response\n}"
           }
         ]
       },
@@ -3544,30 +3544,6 @@
             "description": "Filter by product billing type. `recurring` will filter data corresponding to subscriptions creations or renewals. `one_time` will filter data corresponding to one-time purchases."
           },
           {
-            "name": "product_price_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ProductPriceType"
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProductPriceType"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "ProductPriceType Filter",
-              "deprecated": true
-            },
-            "deprecated": true
-          },
-          {
             "name": "discount_id",
             "in": "query",
             "required": false,
@@ -4637,22 +4613,22 @@
           {
             "lang": "go",
             "label": "Go (SDK)",
-            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Checkouts.Create(ctx, components.CreateCheckoutCreateCheckoutProductCreate(\n        components.CheckoutProductCreate{\n            CustomerBillingAddress: &components.Address{\n                Country: \"SE\",\n            },\n            ProductID: \"<value>\",\n        },\n    ))\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Checkout != nil {\n        // handle response\n    }\n}"
+            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Checkouts.Create(ctx, components.CheckoutCreate{\n        CustomerBillingAddress: &components.Address{\n            Country: \"SE\",\n        },\n        Products: []string{\n            \"<value>\",\n            \"<value>\",\n        },\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Checkout != nil {\n        // handle response\n    }\n}"
           },
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.checkouts.create(request={\n        \"allow_discount_codes\": True,\n        \"customer_billing_address\": {\n            \"country\": \"SE\",\n        },\n        \"product_id\": \"<value>\",\n    })\n\n    # Handle response\n    print(res)"
+            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.checkouts.create(request={\n        \"customer_billing_address\": {\n            \"country\": \"SE\",\n        },\n        \"products\": [\n            \"<value>\",\n            \"<value>\",\n        ],\n    })\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
             "label": "Typescript (SDK)",
-            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.checkouts.create({\n    allowDiscountCodes: true,\n    customerBillingAddress: {\n      country: \"SE\",\n    },\n    productId: \"<value>\",\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
+            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.checkouts.create({\n    customerBillingAddress: {\n      country: \"SE\",\n    },\n    products: [\n      \"<value>\",\n      \"<value>\",\n    ],\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
           },
           {
             "lang": "php",
             "label": "PHP (SDK)",
-            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$request = new Components\\CheckoutProductCreate(\n    customerBillingAddress: new Components\\Address(\n        country: 'SE',\n    ),\n    productId: '<value>',\n);\n\n$response = $sdk->checkouts->create(\n    request: $request\n);\n\nif ($response->checkout !== null) {\n    // handle response\n}"
+            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$request = new Components\\CheckoutCreate(\n    customerBillingAddress: new Components\\Address(\n        country: 'SE',\n    ),\n    products: [\n        '<value>',\n    ],\n);\n\n$response = $sdk->checkouts->create(\n    request: $request\n);\n\nif ($response->checkout !== null) {\n    // handle response\n}"
           }
         ]
       }
@@ -5974,7 +5950,7 @@
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "import dateutil.parser\nimport polar_sdk\nfrom polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.metrics.get(start_date=dateutil.parser.parse(\"2025-02-06\").date(), end_date=dateutil.parser.parse(\"2024-09-04\").date(), interval=polar_sdk.TimeInterval.WEEK, organization_id=[\n        \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n    ])\n\n    # Handle response\n    print(res)"
+            "source": "from datetime import date\nimport polar_sdk\nfrom polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.metrics.get(start_date=date.fromisoformat(\"2025-02-06\"), end_date=date.fromisoformat(\"2024-09-04\"), interval=polar_sdk.TimeInterval.WEEK, organization_id=[\n        \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n    ])\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
@@ -6856,12 +6832,12 @@
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.checkout_links.create(request={\n        \"payment_processor\": \"stripe\",\n        \"allow_discount_codes\": True,\n        \"product_id\": \"<value>\",\n    })\n\n    # Handle response\n    print(res)"
+            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.checkout_links.create(request={\n        \"payment_processor\": \"stripe\",\n        \"allow_discount_codes\": True,\n        \"require_billing_address\": False,\n        \"product_id\": \"<value>\",\n    })\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
             "label": "Typescript (SDK)",
-            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.checkoutLinks.create({\n    allowDiscountCodes: true,\n    productId: \"<value>\",\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
+            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.checkoutLinks.create({\n    allowDiscountCodes: true,\n    requireBillingAddress: false,\n    productId: \"<value>\",\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
           },
           {
             "lang": "php",
@@ -8719,22 +8695,22 @@
           {
             "lang": "go",
             "label": "Go (SDK)",
-            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Customers.Update(ctx, \"<value>\", components.CustomerUpdate{\n        ExternalID: polargo.String(\"usr_1337\"),\n        Email: polargo.String(\"customer@example.com\"),\n        Name: polargo.String(\"John Doe\"),\n        BillingAddress: &components.Address{\n            Country: \"FR\",\n        },\n        TaxID: []*components.CustomerUpdateTaxID{\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"FR61954506077\",\n            )),\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"eu_vat\",\n            )),\n        },\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Customer != nil {\n        // handle response\n    }\n}"
+            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Customers.Update(ctx, \"<value>\", components.CustomerUpdate{\n        Email: polargo.String(\"customer@example.com\"),\n        Name: polargo.String(\"John Doe\"),\n        BillingAddress: &components.Address{\n            Country: \"FR\",\n        },\n        TaxID: []*components.CustomerUpdateTaxID{\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"FR61954506077\",\n            )),\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"eu_vat\",\n            )),\n        },\n        ExternalID: polargo.String(\"usr_1337\"),\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Customer != nil {\n        // handle response\n    }\n}"
           },
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.customers.update(id=\"<value>\", customer_update={\n        \"external_id\": \"usr_1337\",\n        \"email\": \"customer@example.com\",\n        \"name\": \"John Doe\",\n        \"billing_address\": {\n            \"country\": \"FR\",\n        },\n        \"tax_id\": [\n            \"FR61954506077\",\n            \"eu_vat\",\n        ],\n    })\n\n    # Handle response\n    print(res)"
+            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.customers.update(id=\"<value>\", customer_update={\n        \"email\": \"customer@example.com\",\n        \"name\": \"John Doe\",\n        \"billing_address\": {\n            \"country\": \"FR\",\n        },\n        \"tax_id\": [\n            \"FR61954506077\",\n            \"eu_vat\",\n        ],\n        \"external_id\": \"usr_1337\",\n    })\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
             "label": "Typescript (SDK)",
-            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.customers.update({\n    id: \"<value>\",\n    customerUpdate: {\n      externalId: \"usr_1337\",\n      email: \"customer@example.com\",\n      name: \"John Doe\",\n      billingAddress: {\n        country: \"FR\",\n      },\n      taxId: [\n        \"FR61954506077\",\n        \"eu_vat\",\n      ],\n    },\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
+            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.customers.update({\n    id: \"<value>\",\n    customerUpdate: {\n      email: \"customer@example.com\",\n      name: \"John Doe\",\n      billingAddress: {\n        country: \"FR\",\n      },\n      taxId: [\n        \"FR61954506077\",\n        \"eu_vat\",\n      ],\n      externalId: \"usr_1337\",\n    },\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
           },
           {
             "lang": "php",
             "label": "PHP (SDK)",
-            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$customerUpdate = new Components\\CustomerUpdate(\n    externalId: 'usr_1337',\n    email: 'customer@example.com',\n    name: 'John Doe',\n    billingAddress: new Components\\Address(\n        country: 'FR',\n    ),\n    taxId: [\n        'FR61954506077',\n        'eu_vat',\n    ],\n);\n\n$response = $sdk->customers->update(\n    id: '<value>',\n    customerUpdate: $customerUpdate\n\n);\n\nif ($response->customer !== null) {\n    // handle response\n}"
+            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$customerUpdate = new Components\\CustomerUpdate(\n    email: 'customer@example.com',\n    name: 'John Doe',\n    billingAddress: new Components\\Address(\n        country: 'FR',\n    ),\n    taxId: [\n        'FR61954506077',\n        'eu_vat',\n    ],\n    externalId: 'usr_1337',\n);\n\n$response = $sdk->customers->update(\n    id: '<value>',\n    customerUpdate: $customerUpdate\n\n);\n\nif ($response->customer !== null) {\n    // handle response\n}"
           }
         ]
       },
@@ -8944,7 +8920,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CustomerUpdate"
+                "$ref": "#/components/schemas/CustomerUpdateExternalID"
               }
             }
           }
@@ -8998,22 +8974,22 @@
           {
             "lang": "go",
             "label": "Go (SDK)",
-            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Customers.UpdateExternal(ctx, \"<id>\", components.CustomerUpdate{\n        ExternalID: polargo.String(\"usr_1337\"),\n        Email: polargo.String(\"customer@example.com\"),\n        Name: polargo.String(\"John Doe\"),\n        BillingAddress: &components.Address{\n            Country: \"US\",\n        },\n        TaxID: []*components.CustomerUpdateTaxID{\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"FR61954506077\",\n            )),\n            polargo.Pointer(components.CreateCustomerUpdateTaxIDStr(\n                \"eu_vat\",\n            )),\n        },\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Customer != nil {\n        // handle response\n    }\n}"
+            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Customers.UpdateExternal(ctx, \"<id>\", components.CustomerUpdateExternalID{\n        Email: polargo.String(\"customer@example.com\"),\n        Name: polargo.String(\"John Doe\"),\n        BillingAddress: &components.Address{\n            Country: \"US\",\n        },\n        TaxID: []*components.CustomerUpdateExternalIDTaxID{\n            polargo.Pointer(components.CreateCustomerUpdateExternalIDTaxIDStr(\n                \"FR61954506077\",\n            )),\n            polargo.Pointer(components.CreateCustomerUpdateExternalIDTaxIDStr(\n                \"eu_vat\",\n            )),\n        },\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Customer != nil {\n        // handle response\n    }\n}"
           },
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.customers.update_external(external_id=\"<id>\", customer_update={\n        \"external_id\": \"usr_1337\",\n        \"email\": \"customer@example.com\",\n        \"name\": \"John Doe\",\n        \"billing_address\": {\n            \"country\": \"US\",\n        },\n        \"tax_id\": [\n            \"FR61954506077\",\n            \"eu_vat\",\n        ],\n    })\n\n    # Handle response\n    print(res)"
+            "source": "from polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.customers.update_external(external_id=\"<id>\", customer_update_external_id={\n        \"email\": \"customer@example.com\",\n        \"name\": \"John Doe\",\n        \"billing_address\": {\n            \"country\": \"US\",\n        },\n        \"tax_id\": [\n            \"FR61954506077\",\n            \"eu_vat\",\n        ],\n    })\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
             "label": "Typescript (SDK)",
-            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.customers.updateExternal({\n    externalId: \"<id>\",\n    customerUpdate: {\n      externalId: \"usr_1337\",\n      email: \"customer@example.com\",\n      name: \"John Doe\",\n      billingAddress: {\n        country: \"US\",\n      },\n      taxId: [\n        \"FR61954506077\",\n        \"eu_vat\",\n      ],\n    },\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
+            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.customers.updateExternal({\n    externalId: \"<id>\",\n    customerUpdateExternalID: {\n      email: \"customer@example.com\",\n      name: \"John Doe\",\n      billingAddress: {\n        country: \"US\",\n      },\n      taxId: [\n        \"FR61954506077\",\n        \"eu_vat\",\n      ],\n    },\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
           },
           {
             "lang": "php",
             "label": "PHP (SDK)",
-            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$customerUpdate = new Components\\CustomerUpdate(\n    externalId: 'usr_1337',\n    email: 'customer@example.com',\n    name: 'John Doe',\n    billingAddress: new Components\\Address(\n        country: 'US',\n    ),\n    taxId: [\n        'FR61954506077',\n        'eu_vat',\n    ],\n);\n\n$response = $sdk->customers->updateExternal(\n    externalId: '<id>',\n    customerUpdate: $customerUpdate\n\n);\n\nif ($response->customer !== null) {\n    // handle response\n}"
+            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$customerUpdateExternalID = new Components\\CustomerUpdateExternalID(\n    email: 'customer@example.com',\n    name: 'John Doe',\n    billingAddress: new Components\\Address(\n        country: 'US',\n    ),\n    taxId: [\n        'FR61954506077',\n        'eu_vat',\n    ],\n);\n\n$response = $sdk->customers->updateExternal(\n    externalId: '<id>',\n    customerUpdateExternalID: $customerUpdateExternalID\n\n);\n\nif ($response->customer !== null) {\n    // handle response\n}"
           }
         ]
       },
@@ -11475,30 +11451,6 @@
             "description": "Filter by product billing type. `recurring` will filter data corresponding to subscriptions creations or renewals. `one_time` will filter data corresponding to one-time purchases."
           },
           {
-            "name": "product_price_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ProductPriceType"
-                },
-                {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProductPriceType"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "ProductPriceType Filter",
-              "deprecated": true
-            },
-            "deprecated": true
-          },
-          {
             "name": "subscription_id",
             "in": "query",
             "required": false,
@@ -13653,22 +13605,22 @@
           {
             "lang": "go",
             "label": "Go (SDK)",
-            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Meters.Create(ctx, components.MeterCreate{\n        Name: \"<value>\",\n        Filter: components.Filter{\n            Conjunction: components.FilterConjunctionAnd,\n            Clauses: []components.Clauses{\n\n            },\n        },\n        Aggregation: components.CreateMeterCreateAggregationAvg(\n            components.PropertyAggregation{\n                Func: components.FuncSum,\n                Property: \"<value>\",\n            },\n        ),\n        OrganizationID: polargo.String(\"1dbfc517-0bbf-4301-9ba8-555ca42b9737\"),\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Meter != nil {\n        // handle response\n    }\n}"
+            "source": "package main\n\nimport(\n\t\"context\"\n\t\"os\"\n\tpolargo \"github.com/polarsource/polar-go\"\n\t\"github.com/polarsource/polar-go/models/components\"\n\t\"log\"\n)\n\nfunc main() {\n    ctx := context.Background()\n\n    s := polargo.New(\n        polargo.WithSecurity(os.Getenv(\"POLAR_ACCESS_TOKEN\")),\n    )\n\n    res, err := s.Meters.Create(ctx, components.MeterCreate{\n        Name: \"<value>\",\n        Filter: components.Filter{\n            Conjunction: components.FilterConjunctionAnd,\n            Clauses: []components.Clauses{},\n        },\n        Aggregation: components.CreateMeterCreateAggregationAvg(\n            components.PropertyAggregation{\n                Func: components.FuncSum,\n                Property: \"<value>\",\n            },\n        ),\n        OrganizationID: polargo.String(\"1dbfc517-0bbf-4301-9ba8-555ca42b9737\"),\n    })\n    if err != nil {\n        log.Fatal(err)\n    }\n    if res.Meter != nil {\n        // handle response\n    }\n}"
           },
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "import polar_sdk\nfrom polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.meters.create(request={\n        \"name\": \"<value>\",\n        \"filter_\": {\n            \"conjunction\": polar_sdk.FilterConjunction.AND,\n            \"clauses\": [\n\n            ],\n        },\n        \"aggregation\": {\n            \"func\": polar_sdk.Func.SUM,\n            \"property\": \"<value>\",\n        },\n        \"organization_id\": \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n    })\n\n    # Handle response\n    print(res)"
+            "source": "import polar_sdk\nfrom polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.meters.create(request={\n        \"name\": \"<value>\",\n        \"filter_\": {\n            \"conjunction\": polar_sdk.FilterConjunction.AND,\n            \"clauses\": [],\n        },\n        \"aggregation\": {\n            \"func\": polar_sdk.Func.SUM,\n            \"property\": \"<value>\",\n        },\n        \"organization_id\": \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n    })\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
             "label": "Typescript (SDK)",
-            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.meters.create({\n    name: \"<value>\",\n    filter: {\n      conjunction: \"and\",\n      clauses: [\n\n      ],\n    },\n    aggregation: {\n      func: \"sum\",\n      property: \"<value>\",\n    },\n    organizationId: \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
+            "source": "import { Polar } from \"@polar-sh/sdk\";\n\nconst polar = new Polar({\n  accessToken: process.env[\"POLAR_ACCESS_TOKEN\"] ?? \"\",\n});\n\nasync function run() {\n  const result = await polar.meters.create({\n    name: \"<value>\",\n    filter: {\n      conjunction: \"and\",\n      clauses: [],\n    },\n    aggregation: {\n      func: \"sum\",\n      property: \"<value>\",\n    },\n    organizationId: \"1dbfc517-0bbf-4301-9ba8-555ca42b9737\",\n  });\n\n  // Handle the result\n  console.log(result);\n}\n\nrun();"
           },
           {
             "lang": "php",
             "label": "PHP (SDK)",
-            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$request = new Components\\MeterCreate(\n    name: '<value>',\n    filter: new Components\\Filter(\n        conjunction: Components\\FilterConjunction::And,\n        clauses: [\n\n        ],\n    ),\n    aggregation: new Components\\PropertyAggregation(\n        func: Components\\Func::Max,\n        property: '<value>',\n    ),\n    organizationId: '1dbfc517-0bbf-4301-9ba8-555ca42b9737',\n);\n\n$response = $sdk->meters->create(\n    request: $request\n);\n\nif ($response->meter !== null) {\n    // handle response\n}"
+            "source": "declare(strict_types=1);\n\nrequire 'vendor/autoload.php';\n\nuse Polar;\nuse Polar\\Models\\Components;\n\n$sdk = Polar\\Polar::builder()\n    ->setSecurity(\n        '<YOUR_BEARER_TOKEN_HERE>'\n    )\n    ->build();\n\n$request = new Components\\MeterCreate(\n    name: '<value>',\n    filter: new Components\\Filter(\n        conjunction: Components\\FilterConjunction::And,\n        clauses: [],\n    ),\n    aggregation: new Components\\PropertyAggregation(\n        func: Components\\Func::Max,\n        property: '<value>',\n    ),\n    organizationId: '1dbfc517-0bbf-4301-9ba8-555ca42b9737',\n);\n\n$response = $sdk->meters->create(\n    request: $request\n);\n\nif ($response->meter !== null) {\n    // handle response\n}"
           }
         ]
       }
@@ -14019,7 +13971,7 @@
           {
             "lang": "python",
             "label": "Python (SDK)",
-            "source": "import dateutil.parser\nimport polar_sdk\nfrom polar_sdk import Polar\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.meters.quantities(id=\"<value>\", start_timestamp=dateutil.parser.isoparse(\"2023-09-17T00:45:34.608Z\"), end_timestamp=dateutil.parser.isoparse(\"2023-07-21T18:11:39.069Z\"), interval=polar_sdk.TimeInterval.HOUR)\n\n    # Handle response\n    print(res)"
+            "source": "import polar_sdk\nfrom polar_sdk import Polar\nfrom polar_sdk.utils import parse_datetime\n\n\nwith Polar(\n    access_token=\"<YOUR_BEARER_TOKEN_HERE>\",\n) as polar:\n\n    res = polar.meters.quantities(id=\"<value>\", start_timestamp=parse_datetime(\"2023-09-17T00:45:34.608Z\"), end_timestamp=parse_datetime(\"2023-07-21T18:11:39.069Z\"), interval=polar_sdk.TimeInterval.HOUR)\n\n    # Handle response\n    print(res)"
           },
           {
             "lang": "typescript",
@@ -15737,93 +15689,6 @@
           }
         ]
       },
-      "BenefitBase": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Id",
-            "description": "The ID of the benefit."
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At",
-            "description": "Creation timestamp of the object."
-          },
-          "modified_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Modified At",
-            "description": "Last modification timestamp of the object."
-          },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
-          "type": {
-            "$ref": "#/components/schemas/BenefitType",
-            "description": "The type of the benefit."
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "The description of the benefit."
-          },
-          "selectable": {
-            "type": "boolean",
-            "title": "Selectable",
-            "description": "Whether the benefit is selectable when creating a product."
-          },
-          "deletable": {
-            "type": "boolean",
-            "title": "Deletable",
-            "description": "Whether the benefit is deletable."
-          },
-          "organization_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Organization Id",
-            "description": "The ID of the organization owning the benefit."
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "created_at",
-          "modified_at",
-          "metadata",
-          "type",
-          "description",
-          "selectable",
-          "deletable",
-          "organization_id"
-        ],
-        "title": "BenefitBase"
-      },
       "BenefitCreate": {
         "oneOf": [
           {
@@ -15884,26 +15749,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "custom",
@@ -15930,13 +15775,28 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitCustomProperties"
-          },
-          "is_tax_applicable": {
-            "type": "boolean",
-            "title": "Is Tax Applicable",
-            "deprecated": true
           }
         },
         "type": "object",
@@ -15944,14 +15804,13 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
-          "properties",
-          "is_tax_applicable"
+          "metadata",
+          "properties"
         ],
         "title": "BenefitCustom",
         "description": "A benefit of type `custom`.\n\nUse it to grant any kind of benefit that doesn't fit in the other types."
@@ -16115,26 +15974,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "custom",
@@ -16161,6 +16000,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -16173,12 +16032,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -16306,26 +16165,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "discord",
@@ -16352,6 +16191,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitDiscordProperties"
           }
@@ -16361,12 +16220,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "properties"
         ],
         "title": "BenefitDiscord",
@@ -16521,26 +16380,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "discord",
@@ -16567,6 +16406,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -16579,12 +16438,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -16698,26 +16557,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "downloadables",
@@ -16744,6 +16583,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitDownloadablesProperties"
           }
@@ -16753,12 +16612,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "properties"
         ],
         "title": "BenefitDownloadables"
@@ -16923,26 +16782,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "downloadables",
@@ -16969,6 +16808,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -16981,12 +16840,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -17102,26 +16961,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "github_repository",
@@ -17148,6 +16987,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitGitHubRepositoryProperties"
           }
@@ -17157,12 +17016,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "properties"
         ],
         "title": "BenefitGitHubRepository",
@@ -17313,19 +17172,6 @@
             ],
             "title": "Permission",
             "description": "The permission level to grant. Read more about roles and their permissions on [GitHub documentation](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization#permissions-for-each-role)."
-          },
-          "repository_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid4"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Repository Id",
-            "deprecated": true
           }
         },
         "type": "object",
@@ -17364,26 +17210,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "github_repository",
@@ -17410,6 +17236,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -17422,12 +17268,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -17621,12 +17467,6 @@
             "title": "Customer Id",
             "description": "The ID of the customer concerned by this grant."
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "benefit_id": {
             "type": "string",
             "format": "uuid4",
@@ -17667,7 +17507,6 @@
           "subscription_id",
           "order_id",
           "customer_id",
-          "user_id",
           "benefit_id",
           "customer",
           "properties"
@@ -17871,12 +17710,6 @@
             "title": "Customer Id",
             "description": "The ID of the customer concerned by this grant."
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "benefit_id": {
             "type": "string",
             "format": "uuid4",
@@ -17944,7 +17777,6 @@
           "subscription_id",
           "order_id",
           "customer_id",
-          "user_id",
           "benefit_id",
           "customer",
           "properties",
@@ -18041,26 +17873,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "license_keys",
@@ -18087,6 +17899,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitLicenseKeysProperties"
           }
@@ -18096,12 +17928,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "properties"
         ],
         "title": "BenefitLicenseKeys"
@@ -18312,26 +18144,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "license_keys",
@@ -18358,6 +18170,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -18370,12 +18202,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -18528,26 +18360,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "meter_credit",
@@ -18574,6 +18386,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "properties": {
             "$ref": "#/components/schemas/BenefitMeterCreditProperties"
           }
@@ -18583,12 +18415,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "properties"
         ],
         "title": "BenefitMeterCredit",
@@ -18739,26 +18571,6 @@
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
           },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
           "type": {
             "type": "string",
             "const": "meter_credit",
@@ -18785,6 +18597,26 @@
             "title": "Organization Id",
             "description": "The ID of the organization owning the benefit."
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "organization": {
             "$ref": "#/components/schemas/Organization"
           },
@@ -18797,12 +18629,12 @@
           "id",
           "created_at",
           "modified_at",
-          "metadata",
           "type",
           "description",
           "selectable",
           "deletable",
           "organization_id",
+          "metadata",
           "organization",
           "properties"
         ],
@@ -18893,6 +18725,72 @@
           "type"
         ],
         "title": "BenefitMeterCreditUpdate"
+      },
+      "BenefitPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Id",
+            "description": "The ID of the benefit."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Creation timestamp of the object."
+          },
+          "modified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified At",
+            "description": "Last modification timestamp of the object."
+          },
+          "type": {
+            "$ref": "#/components/schemas/BenefitType",
+            "description": "The type of the benefit."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "The description of the benefit."
+          },
+          "selectable": {
+            "type": "boolean",
+            "title": "Selectable",
+            "description": "Whether the benefit is selectable when creating a product."
+          },
+          "deletable": {
+            "type": "boolean",
+            "title": "Deletable",
+            "description": "Whether the benefit is deletable."
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Organization Id",
+            "description": "The ID of the organization owning the benefit."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "modified_at",
+          "type",
+          "description",
+          "selectable",
+          "deletable",
+          "organization_id"
+        ],
+        "title": "BenefitPublic"
       },
       "BenefitSortProperty": {
         "type": "string",
@@ -19076,6 +18974,11 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`."
+          },
           "is_discount_applicable": {
             "type": "boolean",
             "title": "Is Discount Applicable",
@@ -19177,18 +19080,6 @@
             },
             "type": "object",
             "title": "Payment Processor Metadata"
-          },
-          "subtotal_amount": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtotal Amount",
-            "deprecated": true
           },
           "metadata": {
             "additionalProperties": {
@@ -19305,6 +19196,10 @@
             },
             "type": "object",
             "title": "Customer Metadata"
+          },
+          "customer_billing_address_fields": {
+            "$ref": "#/components/schemas/CheckoutCustomerBillingAddressFields",
+            "description": "Determine which billing address fields should be shown in the checkout form."
           }
         },
         "type": "object",
@@ -19329,6 +19224,7 @@
           "product_price_id",
           "discount_id",
           "allow_discount_codes",
+          "require_billing_address",
           "is_discount_applicable",
           "is_free_product_price",
           "is_payment_required",
@@ -19341,7 +19237,6 @@
           "customer_billing_address",
           "customer_tax_id",
           "payment_processor_metadata",
-          "subtotal_amount",
           "metadata",
           "customer_external_id",
           "products",
@@ -19350,7 +19245,8 @@
           "discount",
           "subscription_id",
           "attached_custom_fields",
-          "customer_metadata"
+          "customer_metadata",
+          "customer_billing_address_fields"
         ],
         "title": "Checkout",
         "description": "Checkout session data retrieved using an access token."
@@ -19500,17 +19396,45 @@
         "description": "Confirm a checkout session using a Stripe confirmation token."
       },
       "CheckoutCreate": {
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/CheckoutProductsCreate"
+        "$ref": "#/components/schemas/CheckoutProductsCreate"
+      },
+      "CheckoutCustomerBillingAddressFields": {
+        "properties": {
+          "country": {
+            "type": "boolean",
+            "title": "Country"
           },
-          {
-            "$ref": "#/components/schemas/CheckoutProductCreate"
+          "state": {
+            "type": "boolean",
+            "title": "State"
           },
-          {
-            "$ref": "#/components/schemas/CheckoutPriceCreate"
+          "city": {
+            "type": "boolean",
+            "title": "City"
+          },
+          "postal_code": {
+            "type": "boolean",
+            "title": "Postal Code"
+          },
+          "line1": {
+            "type": "boolean",
+            "title": "Line1"
+          },
+          "line2": {
+            "type": "boolean",
+            "title": "Line2"
           }
-        ]
+        },
+        "type": "object",
+        "required": [
+          "country",
+          "state",
+          "city",
+          "postal_code",
+          "line1",
+          "line2"
+        ],
+        "title": "CheckoutCustomerBillingAddressFields"
       },
       "CheckoutDiscountFixedOnceForeverDuration": {
         "properties": {
@@ -19811,6 +19735,11 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting."
+          },
           "discount_id": {
             "anyOf": [
               {
@@ -19870,34 +19799,6 @@
             ],
             "title": "Discount"
           },
-          "product_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Product Id",
-            "deprecated": true
-          },
-          "product_price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Product Price Id",
-            "deprecated": true
-          },
-          "product": {
-            "$ref": "#/components/schemas/CheckoutLinkProduct",
-            "deprecated": true
-          },
-          "product_price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/LegacyRecurringProductPrice"
-              },
-              {
-                "$ref": "#/components/schemas/ProductPrice"
-              }
-            ],
-            "title": "Product Price",
-            "deprecated": true
-          },
           "url": {
             "type": "string",
             "title": "Url"
@@ -19914,14 +19815,11 @@
           "success_url",
           "label",
           "allow_discount_codes",
+          "require_billing_address",
           "discount_id",
           "organization_id",
           "products",
           "discount",
-          "product_id",
-          "product_price_id",
-          "product",
-          "product_price",
           "url"
         ],
         "title": "CheckoutLink",
@@ -19980,6 +19878,12 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
+          },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting.",
+            "default": false
           },
           "discount_id": {
             "anyOf": [
@@ -20077,6 +19981,12 @@
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting.",
+            "default": false
+          },
           "discount_id": {
             "anyOf": [
               {
@@ -20173,6 +20083,12 @@
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting.",
+            "default": false
+          },
           "discount_id": {
             "anyOf": [
               {
@@ -20222,6 +20138,26 @@
       },
       "CheckoutLinkProduct": {
         "properties": {
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -20308,7 +20244,7 @@
           },
           "benefits": {
             "items": {
-              "$ref": "#/components/schemas/BenefitBase"
+              "$ref": "#/components/schemas/BenefitPublic"
             },
             "type": "array",
             "title": "BenefitPublic",
@@ -20325,6 +20261,7 @@
         },
         "type": "object",
         "required": [
+          "metadata",
           "created_at",
           "modified_at",
           "id",
@@ -20424,6 +20361,18 @@
             ],
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
+          },
+          "require_billing_address": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting."
           },
           "discount_id": {
             "anyOf": [
@@ -20531,6 +20480,12 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
+          },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`.",
+            "default": false
           },
           "amount": {
             "anyOf": [
@@ -20800,7 +20755,7 @@
           },
           "benefits": {
             "items": {
-              "$ref": "#/components/schemas/BenefitBase"
+              "$ref": "#/components/schemas/BenefitPublic"
             },
             "type": "array",
             "title": "BenefitPublic",
@@ -20906,6 +20861,12 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
+          },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`.",
+            "default": false
           },
           "amount": {
             "anyOf": [
@@ -21160,6 +21121,12 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it.",
             "default": true
+          },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`.",
+            "default": false
           },
           "amount": {
             "anyOf": [
@@ -21505,6 +21472,11 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`."
+          },
           "is_discount_applicable": {
             "type": "boolean",
             "title": "Is Discount Applicable",
@@ -21607,18 +21579,6 @@
             "type": "object",
             "title": "Payment Processor Metadata"
           },
-          "subtotal_amount": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtotal Amount",
-            "deprecated": true
-          },
           "products": {
             "items": {
               "$ref": "#/components/schemas/CheckoutProduct"
@@ -21676,6 +21636,10 @@
             },
             "type": "array",
             "title": "Attached Custom Fields"
+          },
+          "customer_billing_address_fields": {
+            "$ref": "#/components/schemas/CheckoutCustomerBillingAddressFields",
+            "description": "Determine which billing address fields should be shown in the checkout form."
           }
         },
         "type": "object",
@@ -21700,6 +21664,7 @@
           "product_price_id",
           "discount_id",
           "allow_discount_codes",
+          "require_billing_address",
           "is_discount_applicable",
           "is_free_product_price",
           "is_payment_required",
@@ -21712,13 +21677,13 @@
           "customer_billing_address",
           "customer_tax_id",
           "payment_processor_metadata",
-          "subtotal_amount",
           "products",
           "product",
           "product_price",
           "discount",
           "organization",
-          "attached_custom_fields"
+          "attached_custom_fields",
+          "customer_billing_address_fields"
         ],
         "title": "CheckoutPublic",
         "description": "Checkout session data retrieved using the client secret."
@@ -21884,6 +21849,11 @@
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
           },
+          "require_billing_address": {
+            "type": "boolean",
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`."
+          },
           "is_discount_applicable": {
             "type": "boolean",
             "title": "Is Discount Applicable",
@@ -21986,18 +21956,6 @@
             "type": "object",
             "title": "Payment Processor Metadata"
           },
-          "subtotal_amount": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtotal Amount",
-            "deprecated": true
-          },
           "products": {
             "items": {
               "$ref": "#/components/schemas/CheckoutProduct"
@@ -22059,6 +22017,10 @@
           "customer_session_token": {
             "type": "string",
             "title": "Customer Session Token"
+          },
+          "customer_billing_address_fields": {
+            "$ref": "#/components/schemas/CheckoutCustomerBillingAddressFields",
+            "description": "Determine which billing address fields should be shown in the checkout form."
           }
         },
         "type": "object",
@@ -22083,6 +22045,7 @@
           "product_price_id",
           "discount_id",
           "allow_discount_codes",
+          "require_billing_address",
           "is_discount_applicable",
           "is_free_product_price",
           "is_payment_required",
@@ -22095,14 +22058,14 @@
           "customer_billing_address",
           "customer_tax_id",
           "payment_processor_metadata",
-          "subtotal_amount",
           "products",
           "product",
           "product_price",
           "discount",
           "organization",
           "attached_custom_fields",
-          "customer_session_token"
+          "customer_session_token",
+          "customer_billing_address_fields"
         ],
         "title": "CheckoutPublicConfirmed",
         "description": "Checkout session data retrieved using the client secret after confirmation.\n\nIt contains a customer session token to retrieve order information\nright after the checkout."
@@ -22295,6 +22258,18 @@
             ],
             "title": "Allow Discount Codes",
             "description": "Whether to allow the customer to apply discount codes. If you apply a discount through `discount_id`, it'll still be applied, but the customer won't be able to change it."
+          },
+          "require_billing_address": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Require Billing Address",
+            "description": "Whether to require the customer to fill their full billing address, instead of just the country. Customers in the US will always be required to fill their full address, regardless of this setting. If you preset the billing address, this setting will be automatically set to `true`."
           },
           "customer_ip_address": {
             "anyOf": [
@@ -25617,6 +25592,12 @@
       },
       "CustomerOrder": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Id",
+            "description": "The ID of the object."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -25635,11 +25616,6 @@
             ],
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Id"
           },
           "status": {
             "$ref": "#/components/schemas/OrderStatus",
@@ -25700,6 +25676,19 @@
             "type": "string",
             "title": "Currency"
           },
+          "billing_reason": {
+            "$ref": "#/components/schemas/OrderBillingReason"
+          },
+          "billing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "customer_id": {
             "type": "string",
             "format": "uuid4",
@@ -25710,11 +25699,17 @@
             "format": "uuid4",
             "title": "Product Id"
           },
-          "product_price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Product Price Id",
-            "deprecated": true
+          "discount_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Id"
           },
           "subscription_id": {
             "anyOf": [
@@ -25728,6 +25723,18 @@
             ],
             "title": "Subscription Id"
           },
+          "checkout_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkout Id"
+          },
           "user_id": {
             "type": "string",
             "format": "uuid4",
@@ -25736,18 +25743,6 @@
           },
           "product": {
             "$ref": "#/components/schemas/CustomerOrderProduct"
-          },
-          "product_price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/LegacyRecurringProductPrice"
-              },
-              {
-                "$ref": "#/components/schemas/ProductPrice"
-              }
-            ],
-            "title": "Product Price",
-            "deprecated": true
           },
           "subscription": {
             "anyOf": [
@@ -25770,9 +25765,9 @@
         },
         "type": "object",
         "required": [
+          "id",
           "created_at",
           "modified_at",
-          "id",
           "status",
           "paid",
           "subtotal_amount",
@@ -25784,13 +25779,15 @@
           "refunded_amount",
           "refunded_tax_amount",
           "currency",
+          "billing_reason",
+          "billing_address",
           "customer_id",
           "product_id",
-          "product_price_id",
+          "discount_id",
           "subscription_id",
+          "checkout_id",
           "user_id",
           "product",
-          "product_price",
           "subscription",
           "items"
         ],
@@ -25899,7 +25896,7 @@
           },
           "benefits": {
             "items": {
-              "$ref": "#/components/schemas/BenefitBase"
+              "$ref": "#/components/schemas/BenefitPublic"
             },
             "type": "array",
             "title": "BenefitPublic",
@@ -26129,12 +26126,6 @@
               }
             ],
             "title": "Customer Cancellation Comment"
-          },
-          "price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Price Id",
-            "deprecated": true
           }
         },
         "type": "object",
@@ -26158,8 +26149,7 @@
           "discount_id",
           "checkout_id",
           "customer_cancellation_reason",
-          "customer_cancellation_comment",
-          "price_id"
+          "customer_cancellation_comment"
         ],
         "title": "CustomerOrderSubscription"
       },
@@ -26479,7 +26469,7 @@
           },
           "benefits": {
             "items": {
-              "$ref": "#/components/schemas/BenefitBase"
+              "$ref": "#/components/schemas/BenefitPublic"
             },
             "type": "array",
             "title": "BenefitPublic",
@@ -27196,15 +27186,6 @@
               null
             ]
           },
-          "price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Price Id",
-            "deprecated": true,
-            "examples": [
-              "196ca717-4d84-4d28-a1b8-777255797dbc"
-            ]
-          },
           "meters": {
             "items": {
               "$ref": "#/components/schemas/CustomerStateSubscriptionMeter"
@@ -27232,7 +27213,6 @@
           "ends_at",
           "product_id",
           "discount_id",
-          "price_id",
           "meters"
         ],
         "title": "CustomerStateSubscription",
@@ -27491,32 +27471,8 @@
             ],
             "title": "Customer Cancellation Comment"
           },
-          "price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Price Id",
-            "deprecated": true
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "product": {
             "$ref": "#/components/schemas/CustomerSubscriptionProduct"
-          },
-          "price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/LegacyRecurringProductPrice"
-              },
-              {
-                "$ref": "#/components/schemas/ProductPrice"
-              }
-            ],
-            "title": "Price",
-            "deprecated": true
           },
           "prices": {
             "items": {
@@ -27564,10 +27520,7 @@
           "checkout_id",
           "customer_cancellation_reason",
           "customer_cancellation_comment",
-          "price_id",
-          "user_id",
           "product",
-          "price",
           "prices",
           "meters"
         ],
@@ -27821,7 +27774,7 @@
           },
           "benefits": {
             "items": {
-              "$ref": "#/components/schemas/BenefitBase"
+              "$ref": "#/components/schemas/BenefitPublic"
             },
             "type": "array",
             "title": "BenefitPublic",
@@ -27928,6 +27881,78 @@
             "title": "Metadata",
             "description": "Key-value object allowing you to store additional information.\n\nThe key must be a string with a maximum length of **40 characters**.\nThe value must be either:\n\n* A string with a maximum length of **500 characters**\n* An integer\n* A floating-point number\n* A boolean\n\nYou can store up to **50 key-value pairs**."
           },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "The email address of the customer. This must be unique within the organization.",
+            "examples": [
+              "customer@example.com"
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "The name of the customer.",
+            "examples": [
+              "John Doe"
+            ]
+          },
+          "billing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tax_id": {
+            "anyOf": [
+              {
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TaxIDFormat"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 2,
+                "minItems": 2,
+                "examples": [
+                  [
+                    "911144442",
+                    "us_ein"
+                  ],
+                  [
+                    "FR61954506077",
+                    "eu_vat"
+                  ]
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Id"
+          },
           "external_id": {
             "anyOf": [
               {
@@ -27942,6 +27967,40 @@
             "examples": [
               "usr_1337"
             ]
+          }
+        },
+        "type": "object",
+        "title": "CustomerUpdate"
+      },
+      "CustomerUpdateExternalID": {
+        "properties": {
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500,
+                  "minLength": 1
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "propertyNames": {
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "object",
+            "maxProperties": 50,
+            "title": "Metadata",
+            "description": "Key-value object allowing you to store additional information.\n\nThe key must be a string with a maximum length of **40 characters**.\nThe value must be either:\n\n* A string with a maximum length of **500 characters**\n* An integer\n* A floating-point number\n* A boolean\n\nYou can store up to **50 key-value pairs**."
           },
           "email": {
             "anyOf": [
@@ -28017,7 +28076,7 @@
           }
         },
         "type": "object",
-        "title": "CustomerUpdate"
+        "title": "CustomerUpdateExternalID"
       },
       "Discount": {
         "oneOf": [
@@ -29972,6 +30031,26 @@
       },
       "DiscountProduct": {
         "properties": {
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -30044,6 +30123,7 @@
         },
         "type": "object",
         "required": [
+          "metadata",
           "created_at",
           "modified_at",
           "id",
@@ -31758,14 +31838,60 @@
             "title": "Label"
           },
           "conditions": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500,
+                  "minLength": 1
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "propertyNames": {
+              "maxLength": 40,
+              "minLength": 1
+            },
             "type": "object",
+            "maxProperties": 50,
             "title": "Conditions",
-            "default": {}
+            "description": "Key-value object allowing you to set conditions that must match when validating the license key.\n\nThe key must be a string with a maximum length of **40 characters**.\nThe value must be either:\n\n* A string with a maximum length of **500 characters**\n* An integer\n* A floating-point number\n* A boolean\n\nYou can store up to **50 key-value pairs**."
           },
           "meta": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500,
+                  "minLength": 1
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "propertyNames": {
+              "maxLength": 40,
+              "minLength": 1
+            },
             "type": "object",
+            "maxProperties": 50,
             "title": "Meta",
-            "default": {}
+            "description": "Key-value object allowing you to store additional information about the activation\n\nThe key must be a string with a maximum length of **40 characters**.\nThe value must be either:\n\n* A string with a maximum length of **500 characters**\n* An integer\n* A floating-point number\n* A boolean\n\nYou can store up to **50 key-value pairs**."
           }
         },
         "type": "object",
@@ -31793,6 +31919,22 @@
             "title": "Label"
           },
           "meta": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
             "type": "object",
             "title": "Meta"
           },
@@ -31842,6 +31984,22 @@
             "title": "Label"
           },
           "meta": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
             "type": "object",
             "title": "Meta"
           },
@@ -32093,27 +32251,37 @@
           "id": {
             "type": "string",
             "format": "uuid4",
-            "title": "Id"
+            "title": "Id",
+            "description": "The ID of the object."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Creation timestamp of the object."
+          },
+          "modified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified At",
+            "description": "Last modification timestamp of the object."
           },
           "organization_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Organization Id"
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "customer_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Customer Id"
-          },
-          "user": {
-            "$ref": "#/components/schemas/LicenseKeyUser",
-            "deprecated": true
           },
           "customer": {
             "$ref": "#/components/schemas/LicenseKeyCustomer"
@@ -32198,10 +32366,10 @@
         "type": "object",
         "required": [
           "id",
+          "created_at",
+          "modified_at",
           "organization_id",
-          "user_id",
           "customer_id",
-          "user",
           "customer",
           "benefit_id",
           "key",
@@ -32383,9 +32551,32 @@
             "title": "Increment Usage"
           },
           "conditions": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500,
+                  "minLength": 1
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "propertyNames": {
+              "maxLength": 40,
+              "minLength": 1
+            },
             "type": "object",
+            "maxProperties": 50,
             "title": "Conditions",
-            "default": {}
+            "description": "Key-value object allowing you to set conditions that must match when validating the license key.\n\nThe key must be a string with a maximum length of **40 characters**.\nThe value must be either:\n\n* A string with a maximum length of **500 characters**\n* An integer\n* A floating-point number\n* A boolean\n\nYou can store up to **50 key-value pairs**."
           }
         },
         "type": "object",
@@ -32400,27 +32591,37 @@
           "id": {
             "type": "string",
             "format": "uuid4",
-            "title": "Id"
+            "title": "Id",
+            "description": "The ID of the object."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Creation timestamp of the object."
+          },
+          "modified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified At",
+            "description": "Last modification timestamp of the object."
           },
           "organization_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Organization Id"
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "customer_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Customer Id"
-          },
-          "user": {
-            "$ref": "#/components/schemas/LicenseKeyUser",
-            "deprecated": true
           },
           "customer": {
             "$ref": "#/components/schemas/LicenseKeyCustomer"
@@ -32512,10 +32713,10 @@
         "type": "object",
         "required": [
           "id",
+          "created_at",
+          "modified_at",
           "organization_id",
-          "user_id",
           "customer_id",
-          "user",
           "customer",
           "benefit_id",
           "key",
@@ -34193,6 +34394,12 @@
       },
       "Order": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Id",
+            "description": "The ID of the object."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -34211,57 +34418,6 @@
             ],
             "title": "Modified At",
             "description": "Last modification timestamp of the object."
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Id",
-            "description": "The ID of the object."
-          },
-          "metadata": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Metadata"
-          },
-          "custom_field_data": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Custom Field Data",
-            "description": "Key-value object storing custom field values."
           },
           "status": {
             "$ref": "#/components/schemas/OrderStatus",
@@ -34345,12 +34501,6 @@
             "format": "uuid4",
             "title": "Product Id"
           },
-          "product_price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Product Price Id",
-            "deprecated": true
-          },
           "discount_id": {
             "anyOf": [
               {
@@ -34387,6 +34537,51 @@
             ],
             "title": "Checkout Id"
           },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
+          "custom_field_data": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Custom Field Data",
+            "description": "Key-value object storing custom field values."
+          },
           "customer": {
             "$ref": "#/components/schemas/OrderCustomer"
           },
@@ -34396,24 +34591,8 @@
             "title": "User Id",
             "deprecated": true
           },
-          "user": {
-            "$ref": "#/components/schemas/OrderUser",
-            "deprecated": true
-          },
           "product": {
             "$ref": "#/components/schemas/OrderProduct"
-          },
-          "product_price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/LegacyRecurringProductPrice"
-              },
-              {
-                "$ref": "#/components/schemas/ProductPrice"
-              }
-            ],
-            "title": "Product Price",
-            "deprecated": true
           },
           "discount": {
             "anyOf": [
@@ -34461,10 +34640,9 @@
         },
         "type": "object",
         "required": [
+          "id",
           "created_at",
           "modified_at",
-          "id",
-          "metadata",
           "status",
           "paid",
           "subtotal_amount",
@@ -34480,15 +34658,13 @@
           "billing_address",
           "customer_id",
           "product_id",
-          "product_price_id",
           "discount_id",
           "subscription_id",
           "checkout_id",
+          "metadata",
           "customer",
           "user_id",
-          "user",
           "product",
-          "product_price",
           "discount",
           "subscription",
           "items"
@@ -34782,6 +34958,26 @@
       },
       "OrderProduct": {
         "properties": {
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -34854,6 +35050,7 @@
         },
         "type": "object",
         "required": [
+          "metadata",
           "created_at",
           "modified_at",
           "id",
@@ -35094,18 +35291,6 @@
               }
             ],
             "title": "Customer Cancellation Comment"
-          },
-          "price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Price Id",
-            "deprecated": true
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
           }
         },
         "type": "object",
@@ -35130,9 +35315,7 @@
           "discount_id",
           "checkout_id",
           "customer_cancellation_reason",
-          "customer_cancellation_comment",
-          "price_id",
-          "user_id"
+          "customer_cancellation_comment"
         ],
         "title": "OrderSubscription"
       },
@@ -35298,66 +35481,6 @@
           "subscription_settings": {
             "$ref": "#/components/schemas/OrganizationSubscriptionSettings",
             "description": "Settings related to subscriptions management"
-          },
-          "bio": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bio",
-            "deprecated": true
-          },
-          "company": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Company",
-            "deprecated": true
-          },
-          "blog": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Blog",
-            "deprecated": true
-          },
-          "location": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Location",
-            "deprecated": true
-          },
-          "twitter_username": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Twitter Username",
-            "deprecated": true
           }
         },
         "type": "object",
@@ -35373,12 +35496,7 @@
           "socials",
           "details_submitted_at",
           "feature_settings",
-          "subscription_settings",
-          "bio",
-          "company",
-          "blog",
-          "location",
-          "twitter_username"
+          "subscription_settings"
         ],
         "title": "Organization"
       },
@@ -38346,12 +38464,6 @@
             ],
             "title": "Customer Cancellation Comment"
           },
-          "price_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "Price Id",
-            "deprecated": true
-          },
           "metadata": {
             "additionalProperties": {
               "anyOf": [
@@ -38400,16 +38512,6 @@
           "customer": {
             "$ref": "#/components/schemas/SubscriptionCustomer"
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
-          "user": {
-            "$ref": "#/components/schemas/SubscriptionUser",
-            "deprecated": true
-          },
           "product": {
             "$ref": "#/components/schemas/Product"
           },
@@ -38437,18 +38539,6 @@
               }
             ],
             "title": "Discount"
-          },
-          "price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/LegacyRecurringProductPrice"
-              },
-              {
-                "$ref": "#/components/schemas/ProductPrice"
-              }
-            ],
-            "title": "Price",
-            "deprecated": true
           },
           "prices": {
             "items": {
@@ -38496,14 +38586,10 @@
           "checkout_id",
           "customer_cancellation_reason",
           "customer_cancellation_comment",
-          "price_id",
           "metadata",
           "customer",
-          "user_id",
-          "user",
           "product",
           "discount",
-          "price",
           "prices",
           "meters"
         ],
@@ -38511,31 +38597,6 @@
       },
       "SubscriptionCancel": {
         "properties": {
-          "cancel_at_period_end": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cancel At Period End",
-            "description": "Cancel an active subscription once the current period ends.\n\nOr uncancel a subscription currently set to be revoked at period end."
-          },
-          "revoke": {
-            "anyOf": [
-              {
-                "type": "boolean",
-                "const": true
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Revoke",
-            "description": "Cancel and revoke an active subscription immediately"
-          },
           "customer_cancellation_reason": {
             "anyOf": [
               {
@@ -38558,9 +38619,17 @@
             ],
             "title": "Customer Cancellation Comment",
             "description": "Customer feedback and why they decided to cancel.\n\n**IMPORTANT:**\nDo not use this to store internal notes! It's intended to be input\nfrom the customer and is therefore also available in their Polar\npurchases library.\n\nOnly set this in case your own service is requesting the reason from the\ncustomer. Or you copy a message directly from a customer\nconversation, i.e support."
+          },
+          "cancel_at_period_end": {
+            "type": "boolean",
+            "title": "Cancel At Period End",
+            "description": "Cancel an active subscription once the current period ends.\n\nOr uncancel a subscription currently set to be revoked at period end."
           }
         },
         "type": "object",
+        "required": [
+          "cancel_at_period_end"
+        ],
         "title": "SubscriptionCancel"
       },
       "SubscriptionCustomer": {
@@ -38843,6 +38912,44 @@
         ],
         "title": "SubscriptionRecurringInterval"
       },
+      "SubscriptionRevoke": {
+        "properties": {
+          "customer_cancellation_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerCancellationReason"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Customer reason for cancellation.\n\nHelpful to monitor reasons behind churn for future improvements.\n\nOnly set this in case your own service is requesting the reason from the\ncustomer. Or you know based on direct conversations, i.e support, with\nthe customer.\n\n* `too_expensive`: Too expensive for the customer.\n* `missing_features`: Customer is missing certain features.\n* `switched_service`: Customer switched to another service.\n* `unused`: Customer is not using it enough.\n* `customer_service`: Customer is not satisfied with the customer service.\n* `low_quality`: Customer is unhappy with the quality.\n* `too_complex`: Customer considers the service too complicated.\n* `other`: Other reason(s)."
+          },
+          "customer_cancellation_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Cancellation Comment",
+            "description": "Customer feedback and why they decided to cancel.\n\n**IMPORTANT:**\nDo not use this to store internal notes! It's intended to be input\nfrom the customer and is therefore also available in their Polar\npurchases library.\n\nOnly set this in case your own service is requesting the reason from the\ncustomer. Or you copy a message directly from a customer\nconversation, i.e support."
+          },
+          "revoke": {
+            "type": "boolean",
+            "const": true,
+            "title": "Revoke",
+            "description": "Cancel and revoke an active subscription immediately"
+          }
+        },
+        "type": "object",
+        "required": [
+          "revoke"
+        ],
+        "title": "SubscriptionRevoke"
+      },
       "SubscriptionSortProperty": {
         "type": "string",
         "enum": [
@@ -38883,6 +38990,9 @@
           },
           {
             "$ref": "#/components/schemas/SubscriptionCancel"
+          },
+          {
+            "$ref": "#/components/schemas/SubscriptionRevoke"
           }
         ]
       },
@@ -39193,27 +39303,37 @@
           "id": {
             "type": "string",
             "format": "uuid4",
-            "title": "Id"
+            "title": "Id",
+            "description": "The ID of the object."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Creation timestamp of the object."
+          },
+          "modified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified At",
+            "description": "Last modification timestamp of the object."
           },
           "organization_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Organization Id"
           },
-          "user_id": {
-            "type": "string",
-            "format": "uuid4",
-            "title": "User Id",
-            "deprecated": true
-          },
           "customer_id": {
             "type": "string",
             "format": "uuid4",
             "title": "Customer Id"
-          },
-          "user": {
-            "$ref": "#/components/schemas/LicenseKeyUser",
-            "deprecated": true
           },
           "customer": {
             "$ref": "#/components/schemas/LicenseKeyCustomer"
@@ -39308,10 +39428,10 @@
         "type": "object",
         "required": [
           "id",
+          "created_at",
+          "modified_at",
           "organization_id",
-          "user_id",
           "customer_id",
-          "user",
           "customer",
           "benefit_id",
           "key",
